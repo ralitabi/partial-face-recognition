@@ -16,27 +16,27 @@ from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler
 import gc
 import pickle
 
-# === CONFIG ===
+# Configuration of the Model.
 DATASET_DIR = 'partial_face_dataset'
 IMG_SIZE = 128
 BATCH_SIZE = 16
-EPOCHS = 20  # Fine-tuning epochs
+EPOCHS = 20  # Fine-tuning epochs.
 MODEL_PATH = "partial_face_model.keras"
 ENCODER_PATH = "label_encoder.pkl"
 
-# === SETUP ===
+# Model Setup.
 os.environ["OMP_NUM_THREADS"] = "2"
 os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
 os.environ["TF_NUM_INTEROP_THREADS"] = "2"
 
-# === STEP 1: Load Metadata ===
+# Process no.1: Loading Metadata.csv.
 metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
 df = pd.read_csv(metadata_path)
 
-# === STEP 2: Train/Test Split ===
+# Process no. 2: Train and Test Split.
 train_df, test_df = train_test_split(df, test_size=0.2, stratify=df['identity'], random_state=42)
 
-# === STEP 3: Image Generators ===
+# Process no. 3: Image formation.
 train_datagen = ImageDataGenerator(
     preprocessing_function=tf.keras.applications.efficientnet.preprocess_input,
     rotation_range=20,
@@ -71,26 +71,26 @@ test_generator = test_datagen.flow_from_dataframe(
     shuffle=False
 )
 
-# === STEP 4: Load Label Encoder ===
+# Process no. 4: Loading the label encoder.
 with open(ENCODER_PATH, 'rb') as f:
     label_encoder = pickle.load(f)
 
-# === STEP 5: Load Existing Model ===
+# Process no. 5: Loading of the Existing Model as we have run the pretrained_model.py earlier and Model is already trained.
 if os.path.exists(MODEL_PATH):
     print("Loading existing trained model for continued training...")
     model = load_model(MODEL_PATH)
     print("Model loaded successfully.")
-    base_model = model.layers[0]  # EfficientNetB0 base
+    base_model = model.layers[0]  #  Using EfficientNetB0 base.
 else:
     raise FileNotFoundError("No pre-trained model found to continue training.")
 
-# === STEP 6: Unfreeze top layers for fine-tuning ===
+# Process no. 6: Unfreezing the top layers for fine-tuning.
 print("Unfreezing top layers for fine-tuning...")
 base_model.trainable = True
 for layer in base_model.layers[:100]:
     layer.trainable = False
 
-# === STEP 7: Compile with lower learning rate ===
+# === STEP 7: Compile with lower learning rate
 model.compile(
     optimizer=Adam(learning_rate=1e-5),
     loss='categorical_crossentropy',
