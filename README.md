@@ -119,7 +119,7 @@ pip install streamlit tensorflow opencv-python pandas matplotlib seaborn scikit-
 This project was developed as a collaborative group assignment by:
 
 - **Raja Ali Tabish**  
-- **Attma Ram**  
+- **Aatma Ram**  
 - **Moiz Kiani**  
 - **Aparna Ghimire**
 
