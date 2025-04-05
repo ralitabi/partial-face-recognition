@@ -1,19 +1,22 @@
 # Partial Face Recognition System
 
-This repository presents a comprehensive project on **Partial Face Recognition** using deep learning. The goal is to accurately recognize a person’s identity even when their face is partially occluded due to
-masks, cropping, blurring, or noise. The solution is built using **TensorFlow/Keras**, utilizes **EfficientNetB0** for feature extraction, and offers a user-friendly web interface using **Streamlit**.
-This project was designed and developed as part of a deep learning course, demonstrating strong teamwork, real-world problem-solving, and an end-to-end deployment pipeline.
+This repository presents a comprehensive project on **Partial Face Recognition** using deep learning. The goal is to accurately recognize a person’s identity even when their face is partially occluded due to masks, cropping, blurring, or noise. The solution is built using **TensorFlow/Keras**, utilizes **EfficientNetB0** for feature extraction, and offers a user-friendly web interface using **Streamlit**.
+
+This project was designed and developed as part of a university-level deep learning course, demonstrating strong teamwork, real-world problem-solving, and an end-to-end deployment pipeline.
+
 
 ## Table of Contents
-- [Features](#Features)
-- [Repository Structure](#Repository-Structure)
-- [Dataset Format](#Dataset-Format)
-- [Model Training and Inference](#Model-Training-and-Interface)
-- [Visualization Outputs](#Visualization-Output)
-- [Installation](#Installation)
-- [Notes](#Notes)
-- [Credits](#Credits)
-- [Future Enhancements](#Future-Enhancements)
+- [Features](#features)
+- [Repository Structure](#repository-structure)
+- [Dataset Format](#dataset-format)
+- [Model Training and Inference](#model-training-and-inference)
+- [Visualization Outputs](#visualization-outputs)
+- [Installation](#installation)
+- [Notes](#notes)
+- [Credits](#credits)
+- [License](#license)
+- [Future Enhancements](#future-enhancements)
+
 
 ## Features
 
@@ -24,6 +27,7 @@ This project was designed and developed as part of a deep learning course, demon
 - Top-3 prediction capability with confidence scores
 - Confusion matrix and training visualizations
 - Interactive GUI for image upload and real-time prediction using Streamlit
+  
 
 ## Repository Structure
 
@@ -40,7 +44,9 @@ This project was designed and developed as part of a deep learning course, demon
 ├── label_encoder.pkl             # Label encoder mapping identities to labels
 ├── metadata.csv                  # Image metadata and identity mapping
 ├── requirements.txt              # List of required Python packages
+├── LICENSE                       # MIT License
 ```
+
 
 ## Dataset Format
 
@@ -54,6 +60,7 @@ The `metadata.csv` should contain two columns:
 - `identity`: corresponding class/label for the person
 
 > Note: Due to size constraints, the dataset and model are not included in this repository. You must place them manually in the project root.
+
 
 ## Model Training and Inference
 
@@ -88,6 +95,7 @@ Upload a partial face image and the app will display:
 - Top-3 predicted identities with confidence scores
 - Reference image of predicted identity
 
+
 ## Visualization Outputs
 
 - `confusion_matrix.png`: Initial training evaluation
@@ -96,6 +104,7 @@ Upload a partial face image and the app will display:
 - `learning_curve_accuracy.png`: Accuracy curve from base training
 
 These images help understand how well the model is performing across training stages.
+
 
 ## Installation
 
@@ -125,6 +134,11 @@ This project was developed as a collaborative group assignment by:
 
 Supervised and guided as part of academic coursework in deep learning and AI applications.
 
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
 ## Future Enhancements
 
 - Add support for face embedding comparisons
@@ -132,6 +146,3 @@ Supervised and guided as part of academic coursework in deep learning and AI app
 - Add identity search history and user feedback tracking
 - Integrate camera-based live recognition
 - Improve dataset diversity and increase model robustness
-
-For any feedback, contributions, or collaboration inquiries, feel free to open an issue or fork the repository.
-
