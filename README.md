@@ -5,15 +5,15 @@ masks, cropping, blurring, or noise. The solution is built using **TensorFlow/Ke
 This project was designed and developed as part of a deep learning course, demonstrating strong teamwork, real-world problem-solving, and an end-to-end deployment pipeline.
 
 ## Table of Contents
-- [Features]
-- [Repository Structure]
-- [Dataset Format]
-- [Model Training and Inference]
-- [Visualization Outputs]
-- [Installation]
-- [Notes]
-- [Credits]
-- [Future Enhancements]
+- [Features](#Features)
+- [Repository Structure](#Repository-Structure)
+- [Dataset Format](#Dataset-Format)
+- [Model Training and Inference](#Model-Training-and-Interface)
+- [Visualization Outputs](#Visualization-Output)
+- [Installation](#Installation)
+- [Notes](#Notes)
+- [Credits](#Credits)
+- [Future Enhancements](#Future-Enhancements)
 
 ## Features
 
