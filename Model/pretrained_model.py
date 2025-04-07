@@ -17,7 +17,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, Learnin
 import gc
 import pickle
 
-# === CONFIG ===
+# Configuration:
 DATASET_DIR = 'partial_face_dataset'
 IMG_SIZE = 128
 BATCH_SIZE = 8
@@ -25,19 +25,19 @@ EPOCHS = 1000
 MODEL_PATH = "partial_face_model.keras"
 ENCODER_PATH = "label_encoder.pkl"
 
-# === SETUP ===
+# SETUP:
 os.environ["OMP_NUM_THREADS"] = "2"
 os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
 os.environ["TF_NUM_INTEROP_THREADS"] = "2"
 
-# === STEP 1: Load Metadata ===
+# Process no.1: Load Metadata:
 metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
 df = pd.read_csv(metadata_path)
 
-# === STEP 2: Train/Test Split ===
+# Process no.2: Train and Test Split:
 train_df, test_df = train_test_split(df, test_size=0.2, stratify=df['identity'], random_state=42)
 
-# === STEP 3: Image Generators ===
+# Process no.3: Image Generators:
 train_datagen = ImageDataGenerator(
     preprocessing_function=tf.keras.applications.efficientnet.preprocess_input,
     rotation_range=20,
@@ -72,14 +72,14 @@ test_generator = test_datagen.flow_from_dataframe(
     shuffle=False
 )
 
-# === STEP 4: Label Encoder Save ===
+# Process no.4: Label Encoder Save:
 label_encoder = LabelEncoder()
 label_encoder.fit(df['identity'])
 
 with open(ENCODER_PATH, 'wb') as f:
     pickle.dump(label_encoder, f)
 
-# === STEP 5: Build Model (EfficientNetB0 + Custom Head) ===
+# Process no.5: Build Model (EfficientNetB0 + Custom Head):
 base_model = tf.keras.applications.EfficientNetB0(
     input_shape=(IMG_SIZE, IMG_SIZE, 3),
     include_top=False,
@@ -102,7 +102,7 @@ model.compile(
 )
 model.summary()
 
-# === STEP 6: Callbacks ===
+# Process no.6: Callbacks:
 def lr_schedule(epoch):
     if epoch < 5:
         return 1e-3
@@ -116,7 +116,7 @@ callbacks = [
     LearningRateScheduler(lr_schedule)
 ]
 
-# === STEP 7: Train Model (Initial) ===
+# Process no.7A: Train Model (Initial):
 history = model.fit(
     train_generator,
     validation_data=test_generator,
@@ -124,7 +124,7 @@ history = model.fit(
     callbacks=callbacks
 )
 
-# === STEP 7B: Fine-Tune ===
+# Process no.7B: Fine-Tune:
 print("\nUnfreezing top layers for fine-tuning...")
 base_model.trainable = True
 for layer in base_model.layers[:100]:
@@ -143,12 +143,12 @@ history_fine = model.fit(
     callbacks=callbacks
 )
 
-# === STEP 8: Evaluate Model ===
+# Process no.8: Evaluate Model
 loss, acc, top3_acc = model.evaluate(test_generator)
 print(f"\nTest Accuracy: {acc*100:.2f}%")
 print(f"Top-3 Accuracy: {top3_acc*100:.2f}%")
 
-# === STEP 9: Confusion Matrix ===
+# Process no.9A: Confusion Matrix:
 print("Predicting test set...")
 y_pred = model.predict(test_generator, verbose=1)
 print("Prediction complete.")
@@ -164,7 +164,7 @@ plt.ylabel("True")
 plt.savefig("confusion_matrix.png")
 plt.close()
 
-# === STEP 9B: Per-Type Evaluation ===
+# Process no.9B: Per-Type Evaluation:
 test_df['predicted'] = [label_encoder.classes_[i] for i in y_pred_classes]
 test_df['true'] = [label_encoder.classes_[i] for i in y_true]
 test_df['type'] = test_df['filename'].apply(lambda x: os.path.basename(x).split('.')[0])
@@ -175,7 +175,7 @@ for face_type in test_df['type'].unique():
     acc = correct / len(subset)
     print(f"{face_type}: {acc*100:.2f}% accuracy")
 
-# === STEP 9C: Learning Curves ===
+# Process no.9C: Learning Curves:
 plt.figure()
 plt.plot(history.history['accuracy'], label='Train Acc')
 plt.plot(history.history['val_accuracy'], label='Val Acc')
@@ -189,11 +189,11 @@ plt.legend()
 plt.savefig("learning_curve_accuracy.png")
 plt.close()
 
-# === STEP 10: Save Model ===
+# Process no.10: Save Model:
 model.save(MODEL_PATH)
 print(f"Model saved to {MODEL_PATH}")
 
-# === STEP 11: Predict Image with Top-3 Reference ===
+# Process no.11: Predict Image with Top-3 Reference:
 def predict_image(img_path):
     if not os.path.exists(img_path):
         print(f"Image not found: {img_path}")
@@ -235,11 +235,3 @@ def predict_image(img_path):
     plt.tight_layout()
     plt.savefig("prediction_result.png")
     plt.close()
-
-# === STEP 12: RAM Cleanup ===
-from tensorflow.keras import backend as K
-K.clear_session()
-gc.collect()
-
-# === USAGE ===
-#predict_image(os.path.join(DATASET_DIR, 'id_0000', 'top_crop.jpg'))
