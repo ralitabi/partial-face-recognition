@@ -6,22 +6,22 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import pickle
 
-# === CONFIG ===
+# Configuration:
 MODEL_PATH = "partial_face_model.keras"
 ENCODER_PATH = "label_encoder.pkl"
 DATASET_DIR = "partial_face_dataset"
 IMG_SIZE = 128
 
-# === Load model and encoder ===
+# Loading model and encoder:
 model = tf.keras.models.load_model(MODEL_PATH)
 with open(ENCODER_PATH, 'rb') as f:
     label_encoder = pickle.load(f)
 
-# === Load metadata for reference image ===
+# Loading metadata for reference image:
 metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
 df = pd.read_csv(metadata_path)
 
-# === Prediction Function ===
+# Prediction Function:
 def predict_image(img_path):
     if not os.path.exists(img_path):
         print(f"Image not found: {img_path}")
@@ -32,12 +32,12 @@ def predict_image(img_path):
         print("Could not read image.")
         return
 
-    # Resize and preprocess
+    # Resize and preprocess:
     img_resized = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
     img_input = tf.keras.applications.efficientnet.preprocess_input(img_resized)
     img_input = np.expand_dims(img_input, axis=0)
 
-    # Make prediction
+    # Make prediction:
     prediction = model.predict(img_input)[0]
     top3_idx = prediction.argsort()[-3:][::-1]
 
@@ -47,7 +47,7 @@ def predict_image(img_path):
         confidence = prediction[idx] * 100
         print(f"{i+1}. {label} ({confidence:.2f}%)")
 
-    # Display result
+    # Display result:
     predicted_class = label_encoder.inverse_transform([top3_idx[0]])[0]
     ref_row = df[df['identity'] == predicted_class].iloc[0]
     ref_img_path = os.path.join(DATASET_DIR, ref_row['filename'])
@@ -72,6 +72,6 @@ def predict_image(img_path):
     plt.close()
     print("Prediction image saved as prediction_result.png")
 
-# === USAGE ===
-# Replace this path with an image you want to test
+# How to use it?
+# Replace this path with an image you want to test in the inverted commas.
 predict_image("partial_face_dataset/id_0150/top_crop.jpg")
