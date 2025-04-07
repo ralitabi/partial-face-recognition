@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-# === INPUT/OUTPUT PATHS ===
-input_dir = "part3"  # Change this to your actual folder name
+# INPUT and OUTPUT PATHS
+input_dir = "part3"  # Change this to your actual folder name as we have named the folder as "part3"
 output_dir = "partial_face_dataset"
 os.makedirs(output_dir, exist_ok=True)
 
 metadata = []
 
-# === TRANSFORMATION FUNCTIONS ===
+# TRANSFORMATION FUNCTIONS:
 def crop_top(img):
     return img[:img.shape[0]//2, :]
 
@@ -55,7 +55,7 @@ def add_noise_patch(img):
     noisy_img[y:y+40, x:x+40] = noise
     return noisy_img
 
-# === PROCESSING IMAGES ===
+# PROCESSING IMAGES:
 image_files = [f for f in os.listdir(input_dir) if f.endswith(".jpg")]
 
 for i, filename in enumerate(tqdm(image_files[:1100])):  # Adjust limit if needed
@@ -68,7 +68,7 @@ for i, filename in enumerate(tqdm(image_files[:1100])):  # Adjust limit if neede
     person_dir = os.path.join(output_dir, base_name)
     os.makedirs(person_dir, exist_ok=True)
 
-    # Variants
+    # Variants:
     variants = {
         "original": img,
         "top_crop": crop_top(img),
@@ -85,7 +85,7 @@ for i, filename in enumerate(tqdm(image_files[:1100])):  # Adjust limit if neede
         cv2.imwrite(out_path, var_img)
         metadata.append([out_path, base_name, var_name])
 
-# === SAVE METADATA CSV ===
+# SAVE METADATA.CSV
 df = pd.DataFrame(metadata, columns=["filename", "identity", "transformation"])
 df.to_csv(os.path.join(output_dir, "metadata.csv"), index=False)
 
