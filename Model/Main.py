@@ -16,27 +16,27 @@ from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler
 import gc
 import pickle
 
-# === CONFIG ===
+# Configuration for the model:
 DATASET_DIR = 'partial_face_dataset'
 IMG_SIZE = 128
 BATCH_SIZE = 16
-EPOCHS = 20  # Fine-tuning epochs
+EPOCHS = 20  # Fine-tuning epochs, the more you increase the number, the more the model will train itself against the dataset you have given to it.
 MODEL_PATH = "partial_face_model.keras"
 ENCODER_PATH = "label_encoder.pkl"
 
-# === SETUP ===
+# SETUP:
 os.environ["OMP_NUM_THREADS"] = "2"
 os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
 os.environ["TF_NUM_INTEROP_THREADS"] = "2"
 
-# === STEP 1: Load Metadata ===
+# Process no.1: Load Metadata.csv:
 metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
 df = pd.read_csv(metadata_path)
 
-# === STEP 2: Train/Test Split ===
+# Process no.2: Train and Test Split:
 train_df, test_df = train_test_split(df, test_size=0.2, stratify=df['identity'], random_state=42)
 
-# === STEP 3: Image Generators ===
+# Process no.3: Image Generators:
 train_datagen = ImageDataGenerator(
     preprocessing_function=tf.keras.applications.efficientnet.preprocess_input,
     rotation_range=20,
@@ -71,11 +71,11 @@ test_generator = test_datagen.flow_from_dataframe(
     shuffle=False
 )
 
-# === STEP 4: Load Label Encoder ===
+# Process no.4: Loading Label Encoder:
 with open(ENCODER_PATH, 'rb') as f:
     label_encoder = pickle.load(f)
 
-# === STEP 5: Load Existing Model ===
+# Process no.5: Loading Existing Model:
 if os.path.exists(MODEL_PATH):
     print("Loading existing trained model for continued training...")
     model = load_model(MODEL_PATH)
@@ -84,20 +84,20 @@ if os.path.exists(MODEL_PATH):
 else:
     raise FileNotFoundError("No pre-trained model found to continue training.")
 
-# === STEP 6: Unfreeze top layers for fine-tuning ===
+# Process no.6: Unfreeze top layers for fine-tuning:
 print("Unfreezing top layers for fine-tuning...")
 base_model.trainable = True
 for layer in base_model.layers[:100]:
     layer.trainable = False
 
-# === STEP 7: Compile with lower learning rate ===
+# Process no.7: Compile with lower learning rate:
 model.compile(
     optimizer=Adam(learning_rate=1e-5),
     loss='categorical_crossentropy',
     metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=3, name='top_3_accuracy')]
 )
 
-# === STEP 8: Callbacks and Continue Training ===
+# Process no.8: Callbacks and Continue Training:
 def lr_schedule(epoch):
     if epoch < 5:
         return 1e-5
@@ -119,16 +119,16 @@ history_fine = model.fit(
     callbacks=callbacks
 )
 
-# === STEP 9: Save Improved Model ===
+# Process no.9: Save Improved Model:
 model.save(MODEL_PATH)
 print(f"Updated model saved to {MODEL_PATH}")
 
-# === STEP 10: Accuracy Metrics ===
+# Process no.10: Accuracy Metrics:
 eval_loss, eval_acc, eval_top3 = model.evaluate(test_generator)
 print(f"\nFinal Test Accuracy: {eval_acc * 100:.2f}%")
 print(f"Final Top-3 Accuracy: {eval_top3 * 100:.2f}%")
 
-# === STEP 11: Confusion Matrix & Classification Report ===
+# Process no.11: Confusion Matrix & Classification Report:
 y_pred_probs = model.predict(test_generator, verbose=1)
 y_pred = np.argmax(y_pred_probs, axis=1)
 y_true = test_generator.classes
@@ -145,7 +145,7 @@ plt.close()
 print("\nClassification Report:")
 print(classification_report(y_true, y_pred, target_names=label_encoder.classes_))
 
-# === STEP 12: Per-Type Accuracy ===
+# Process no.12: Per-Type Accuracy:
 test_df['predicted'] = [label_encoder.classes_[i] for i in y_pred]
 test_df['true'] = [label_encoder.classes_[i] for i in y_true]
 test_df['type'] = test_df['filename'].apply(lambda x: os.path.basename(x).split('.')[0])
@@ -156,7 +156,7 @@ for face_type in test_df['type'].unique():
     acc = correct / len(subset)
     print(f"{face_type}: {acc*100:.2f}% accuracy")
 
-# === STEP 13: Learning Curve Plot ===
+# Process no.13: Learning Curve Plot:
 plt.plot(history_fine.history['accuracy'], label='Fine-tuned Train')
 plt.plot(history_fine.history['val_accuracy'], label='Fine-tuned Val')
 plt.title('Fine-Tuning Accuracy')
