@@ -8,14 +8,14 @@ import pickle
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 
-# === CONFIG ===
+# Configuration:
 MODEL_PATH = "partial_face_model.keras"
 ENCODER_PATH = "label_encoder.pkl"
 DATASET_DIR = "partial_face_dataset"
 METADATA_PATH = os.path.join(DATASET_DIR, "metadata.csv")
 IMG_SIZE = 128
 
-# === Load model and encoder ===
+# Loading model and encoder:
 @st.cache_resource
 def load_model_and_encoder():
     model = load_model(MODEL_PATH)
@@ -25,14 +25,14 @@ def load_model_and_encoder():
 
 model, label_encoder = load_model_and_encoder()
 
-# === Load metadata ===
+# Load metadata.csv
 @st.cache_data
 def load_metadata():
     return pd.read_csv(METADATA_PATH)
 
 df = load_metadata()
 
-# === Prediction Function ===
+# Run Prediction Function:
 def predict_image(image):
     img_resized = cv2.resize(image, (IMG_SIZE, IMG_SIZE))
     img_preprocessed = tf.keras.applications.efficientnet.preprocess_input(img_resized)
@@ -43,26 +43,26 @@ def predict_image(image):
     top3_conf = predictions[top3_idx]
     return top3_labels, top3_conf
 
-# === Streamlit Interface ===
+# Interface of our Application for displaying on web browser:
 st.title("Partial Face Recognition App")
 st.write("Upload a partial face image to predict the person's identity.")
 
 uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Load and display input image
+    # Load and display the input image:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, 1)
     st.image(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), caption="Uploaded Image", use_column_width=True)
 
-    # Predict
+    # Prediction:
     top3_labels, top3_conf = predict_image(image)
 
     st.subheader("Top 3 Predictions:")
     for i in range(3):
         st.write(f"{i+1}. {top3_labels[i]} ({top3_conf[i]*100:.2f}%)")
 
-    # Show reference image
+    # Show reference image in result for matching the output:
     predicted_class = top3_labels[0]
     ref_row = df[df['identity'] == predicted_class].iloc[0]
     ref_path = os.path.join(DATASET_DIR, ref_row['filename'])
