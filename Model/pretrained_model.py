@@ -1,237 +1,381 @@
-import os
-import cv2
+"""
+Partial Face Recognition - Accuracy-Boosted Training.
+
+Phase 0  Feature extraction (cached, instant on re-run).
+Phase 1  Head training on cached features + feature noise augmentation.
+         Skipped automatically if best_model.pt already exists.
+Phase 2  Fine-tune last 2 backbone blocks on original-only subset
+         (~2K images per epoch = ~4-5 min/epoch on CPU, 5 epochs max).
+Phase 3  Test-time evaluation with 3-view TTA (flip + brightness).
+"""
+
+import sys, gc, time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
-import tensorflow as tf
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
-import gc
-import pickle
+from pathlib import Path
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.utils.class_weight import compute_class_weight
+from sklearn.model_selection import train_test_split
 
-# Configuration:
-DATASET_DIR = 'partial_face_dataset'
-IMG_SIZE = 128
-BATCH_SIZE = 8
-EPOCHS = 1000
-MODEL_PATH = "partial_face_model.keras"
-ENCODER_PATH = "label_encoder.pkl"
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+from torchvision import transforms
 
-# SETUP:
-os.environ["OMP_NUM_THREADS"] = "2"
-os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
-os.environ["TF_NUM_INTEROP_THREADS"] = "2"
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from model_utils import (IMG_SIZE, FaceDataset, build_model,
+                         load_checkpoint, eval_tf, train_tf, accuracy,
+                         MEAN, STD)
 
-# Process no.1: Load Metadata:
-metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
-df = pd.read_csv(metadata_path)
+DATASET_DIR  = ROOT / "partial_face_dataset"
+CACHE_DIR    = ROOT / "features_cache"
+MODEL_PATH   = ROOT / "partial_face_model.pt"
+BEST_PATH    = ROOT / "best_model.pt"
+RESULTS_DIR  = ROOT / "results"
 
-# Process no.2: Train and Test Split:
-train_df, test_df = train_test_split(df, test_size=0.2, stratify=df['identity'], random_state=42)
+BATCH_EXTRACT = 64
+BATCH_HEAD    = 512
+BATCH_FINE    = 8        # small batch for fine-tune (memory)
+EPOCHS_HEAD   = 80
+EPOCHS_FINE   = 5
+LR_HEAD       = 3e-3
+LR_FINE       = 5e-6
+PATIENCE_HEAD = 12
+PATIENCE_FINE = 4
+FEAT_NOISE    = 0.02     # Gaussian noise std added to features during head training
+SEED          = 42
 
-# Process no.3: Image Generators:
-train_datagen = ImageDataGenerator(
-    preprocessing_function=tf.keras.applications.efficientnet.preprocess_input,
-    rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
-    brightness_range=[0.8, 1.2],
-    horizontal_flip=True
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Device: {DEVICE}")
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+meta = pd.read_csv(DATASET_DIR / "metadata.csv")
+
+if "split" in meta.columns:
+    train_df = meta[meta["split"] == "train"].reset_index(drop=True)
+    val_df   = meta[meta["split"] == "val"].reset_index(drop=True)
+    test_df  = meta[meta["split"] == "test"].reset_index(drop=True)
+else:
+    train_df, tmp   = train_test_split(meta, test_size=0.30,
+                                       stratify=meta["identity"], random_state=SEED)
+    val_df, test_df = train_test_split(tmp, test_size=0.50,
+                                       stratify=tmp["identity"], random_state=SEED)
+
+# Original-only subset for Phase 2 fine-tuning (10x fewer images, 10x faster/epoch)
+orig_train_df = train_df[train_df.get("transformation", pd.Series(["original"]*len(train_df))) == "original"].reset_index(drop=True)
+if orig_train_df.empty:
+    orig_train_df = train_df
+
+print(f"Train {len(train_df):,}  Val {len(val_df):,}  Test {len(test_df):,}")
+print(f"Orig-only train: {len(orig_train_df):,} (used for Phase 2)")
+
+classes      = sorted(meta["identity"].unique().tolist())
+num_classes  = len(classes)
+class_to_idx = {c: i for i, c in enumerate(classes)}
+idx_to_class = {i: c for c, i in class_to_idx.items()}
+
+y_train       = train_df["identity"].map(class_to_idx).values
+weights_arr   = compute_class_weight("balanced", classes=np.arange(num_classes), y=y_train)
+class_weights = torch.tensor(weights_arr, dtype=torch.float32).to(DEVICE)
+print(f"Classes: {num_classes}")
+
+# ── Phase 0: Feature extraction (cached) ─────────────────────────────────────
+CACHE_DIR.mkdir(exist_ok=True)
+
+def extract_features(df_split, split_name, backbone):
+    feat_path  = CACHE_DIR / f"{split_name}_feats.pt"
+    label_path = CACHE_DIR / f"{split_name}_labels.pt"
+    if feat_path.exists() and label_path.exists():
+        print(f"  [cache] {split_name}")
+        return (torch.load(feat_path,  weights_only=True),
+                torch.load(label_path, weights_only=True))
+    loader = DataLoader(FaceDataset(df_split, DATASET_DIR, eval_tf, class_to_idx),
+                        batch_size=BATCH_EXTRACT, shuffle=False, num_workers=0)
+    feats_list, labels_list = [], []
+    backbone.eval()
+    with torch.no_grad():
+        for i, (imgs, labels) in enumerate(loader):
+            f = backbone.avgpool(backbone.features(imgs.to(DEVICE))).flatten(1)
+            feats_list.append(f.cpu())
+            labels_list.append(labels)
+            done = min((i+1)*BATCH_EXTRACT, len(df_split))
+            print(f"  extracting {split_name}: {done}/{len(df_split)}", end="\r")
+    feats  = torch.cat(feats_list)
+    labels = torch.cat(labels_list)
+    torch.save(feats,  feat_path)
+    torch.save(labels, label_path)
+    print(f"  [saved] {split_name}: {feats.shape}                     ")
+    return feats, labels
+
+print("\n[Phase 0] Feature extraction...")
+backbone = build_model(num_classes, pretrained=True).to(DEVICE)
+
+train_feats, train_labels = extract_features(train_df, "train", backbone)
+val_feats,   val_labels   = extract_features(val_df,   "val",   backbone)
+test_feats,  test_labels  = extract_features(test_df,  "test",  backbone)
+
+model = backbone
+head  = model.classifier
+criterion = nn.CrossEntropyLoss(weight=class_weights, label_smoothing=0.1)
+
+def tensor_loader(feats, labels, batch_size, shuffle):
+    ds = TensorDataset(feats.to(DEVICE), labels.to(DEVICE))
+    return DataLoader(ds, batch_size=batch_size, shuffle=shuffle)
+
+train_feat_ldr = tensor_loader(train_feats, train_labels, BATCH_HEAD, True)
+val_feat_ldr   = tensor_loader(val_feats,   val_labels,   BATCH_HEAD, False)
+
+# ── Phase 1: Head training with feature noise ─────────────────────────────────
+def run_head_epoch(loader, optimizer=None):
+    head.train() if optimizer else head.eval()
+    total_loss = correct = total = 0
+    ctx = torch.enable_grad() if optimizer else torch.no_grad()
+    with ctx:
+        for feats, labels in loader:
+            if optimizer and FEAT_NOISE > 0:
+                feats = feats + torch.randn_like(feats) * FEAT_NOISE
+            if optimizer:
+                optimizer.zero_grad()
+            out  = head(feats)
+            loss = criterion(out, labels)
+            if optimizer:
+                loss.backward()
+                optimizer.step()
+            total_loss += loss.item() * len(feats)
+            correct    += (out.argmax(1) == labels).sum().item()
+            total      += len(feats)
+    return total_loss / total, correct / total
+
+def training_loop(epochs, optimizer, scheduler, label, patience, run_fn,
+                  train_ldr, val_ldr, skip_if_exists=False):
+    if skip_if_exists and BEST_PATH.exists():
+        print(f"  [skip] {label} — best_model.pt already exists")
+        return {"train_loss":[], "train_acc":[], "val_loss":[], "val_acc":[]}, 0.0
+
+    history    = {"train_loss":[], "train_acc":[], "val_loss":[], "val_acc":[]}
+    no_improve = 0
+    best_val   = 0.0
+    print(f"\n{'='*60}\n  {label}\n{'='*60}")
+    for epoch in range(1, epochs + 1):
+        t0 = time.time()
+        tr_loss, tr_acc = run_fn(train_ldr, optimizer)
+        va_loss, va_acc = run_fn(val_ldr)
+        if hasattr(scheduler, 'step'):
+            scheduler.step(va_loss) if isinstance(scheduler,
+                optim.lr_scheduler.ReduceLROnPlateau) else scheduler.step()
+        history["train_loss"].append(tr_loss)
+        history["train_acc"].append(tr_acc)
+        history["val_loss"].append(va_loss)
+        history["val_acc"].append(va_acc)
+        print(f"Epoch {epoch:3d}/{epochs} | "
+              f"train {tr_acc*100:.1f}% ({tr_loss:.4f}) | "
+              f"val {va_acc*100:.1f}% ({va_loss:.4f}) | "
+              f"{time.time()-t0:.1f}s")
+        if va_acc > best_val:
+            best_val   = va_acc
+            no_improve = 0
+            torch.save({"model_state": model.state_dict(),
+                        "class_to_idx": class_to_idx,
+                        "idx_to_class": idx_to_class,
+                        "num_classes":  num_classes}, BEST_PATH)
+            print(f"  -> best saved ({va_acc*100:.2f}%)")
+        else:
+            no_improve += 1
+            if no_improve >= patience:
+                print(f"  Early stopping at epoch {epoch}")
+                break
+    return history, best_val
+
+for param in model.features.parameters():
+    param.requires_grad = False
+
+opt1   = optim.Adam(head.parameters(), lr=LR_HEAD, weight_decay=1e-4)
+sched1 = optim.lr_scheduler.CosineAnnealingLR(opt1, T_max=EPOCHS_HEAD, eta_min=1e-5)
+
+history1, best1 = training_loop(
+    EPOCHS_HEAD, opt1, sched1,
+    f"Phase 1 - Head + feature noise  (lr={LR_HEAD})",
+    PATIENCE_HEAD, run_head_epoch, train_feat_ldr, val_feat_ldr,
+    skip_if_exists=True,   # skip if already trained
 )
-test_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.efficientnet.preprocess_input)
 
-train_generator = train_datagen.flow_from_dataframe(
-    train_df,
-    directory=DATASET_DIR,
-    x_col='filename',
-    y_col='identity',
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='categorical',
-    batch_size=BATCH_SIZE,
-    shuffle=True
+# ── Phase 2: Fine-tune last 2 backbone blocks on original images ───────────────
+print(f"\n[Phase 2] Fine-tuning backbone on {len(orig_train_df):,} original images...")
+
+ckpt = load_checkpoint(BEST_PATH, DEVICE)
+model.load_state_dict(ckpt["model_state"])
+
+# Unfreeze last 2 EfficientNet blocks + head
+for param in model.parameters():
+    param.requires_grad = False
+# model.features has 9 children (0-8); unfreeze 7 and 8
+for layer in list(model.features.children())[-2:]:
+    for param in layer.parameters():
+        param.requires_grad = True
+for param in model.classifier.parameters():
+    param.requires_grad = True
+
+trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+print(f"  Trainable params: {trainable_params:,}")
+
+orig_train_ldr = DataLoader(
+    FaceDataset(orig_train_df, DATASET_DIR, train_tf, class_to_idx),
+    batch_size=BATCH_FINE, shuffle=True, num_workers=0)
+val_img_ldr = DataLoader(
+    FaceDataset(val_df, DATASET_DIR, eval_tf, class_to_idx),
+    batch_size=BATCH_FINE, shuffle=False, num_workers=0)
+
+criterion_fine = nn.CrossEntropyLoss(weight=class_weights, label_smoothing=0.05)
+
+def run_full_epoch(loader, optimizer=None):
+    model.train() if optimizer else model.eval()
+    total_loss = correct = total = 0
+    ctx = torch.enable_grad() if optimizer else torch.no_grad()
+    with ctx:
+        for imgs, labels in loader:
+            imgs, labels = imgs.to(DEVICE), labels.to(DEVICE)
+            if optimizer:
+                optimizer.zero_grad()
+            out  = model(imgs)
+            loss = criterion_fine(out, labels)
+            if optimizer:
+                loss.backward()
+                optimizer.step()
+            total_loss += loss.item() * len(imgs)
+            correct    += (out.argmax(1) == labels).sum().item()
+            total      += len(imgs)
+    return total_loss / total, correct / total
+
+opt2   = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
+                    lr=LR_FINE, weight_decay=1e-4)
+sched2 = optim.lr_scheduler.CosineAnnealingLR(opt2, T_max=EPOCHS_FINE, eta_min=1e-7)
+
+history2, _ = training_loop(
+    EPOCHS_FINE, opt2, sched2,
+    f"Phase 2 - Backbone fine-tune  (lr={LR_FINE})",
+    PATIENCE_FINE, run_full_epoch, orig_train_ldr, val_img_ldr,
+    skip_if_exists=False,  # always run Phase 2
 )
 
-test_generator = test_datagen.flow_from_dataframe(
-    test_df,
-    directory=DATASET_DIR,
-    x_col='filename',
-    y_col='identity',
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='categorical',
-    batch_size=BATCH_SIZE,
-    shuffle=False
-)
+# ── Phase 3: Evaluate with 3-view TTA ────────────────────────────────────────
+print("\n[Phase 3] Evaluating with 3-view TTA...")
+ckpt = load_checkpoint(BEST_PATH, DEVICE)
+model.load_state_dict(ckpt["model_state"])
+model.eval()
 
-# Process no.4: Label Encoder Save:
-label_encoder = LabelEncoder()
-label_encoder.fit(df['identity'])
-
-with open(ENCODER_PATH, 'wb') as f:
-    pickle.dump(label_encoder, f)
-
-# Process no.5: Build Model (EfficientNetB0 + Custom Head):
-base_model = tf.keras.applications.EfficientNetB0(
-    input_shape=(IMG_SIZE, IMG_SIZE, 3),
-    include_top=False,
-    weights='imagenet'
-)
-base_model.trainable = False
-
-model = Sequential([
-    base_model,
-    tf.keras.layers.GlobalAveragePooling2D(),
-    tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(len(label_encoder.classes_), activation='softmax')
-])
-
-model.compile(
-    optimizer=Adam(learning_rate=0.001),
-    loss='categorical_crossentropy',
-    metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=3, name='top_3_accuracy')]
-)
-model.summary()
-
-# Process no.6: Callbacks:
-def lr_schedule(epoch):
-    if epoch < 5:
-        return 1e-3
-    elif epoch < 15:
-        return 5e-4
-    else:
-        return 1e-4
-
-callbacks = [
-    EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True),
-    LearningRateScheduler(lr_schedule)
+# Build TTA transforms: original, h-flip, brightness boost
+tta_tfs = [
+    eval_tf,
+    transforms.Compose([
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        transforms.RandomHorizontalFlip(p=1.0),
+        transforms.ToTensor(),
+        transforms.Normalize(MEAN, STD),
+    ]),
+    transforms.Compose([
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        transforms.ColorJitter(brightness=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize(MEAN, STD),
+    ]),
 ]
 
-# Process no.7A: Train Model (Initial):
-history = model.fit(
-    train_generator,
-    validation_data=test_generator,
-    epochs=EPOCHS,
-    callbacks=callbacks
-)
+from PIL import Image as PILImage
+import cv2 as _cv2
 
-# Process no.7B: Fine-Tune:
-print("\nUnfreezing top layers for fine-tuning...")
-base_model.trainable = True
-for layer in base_model.layers[:100]:
-    layer.trainable = False
+def tta_predict_batch(img_paths):
+    all_probs = []
+    for tf in tta_tfs:
+        probs_list = []
+        for path in img_paths:
+            img = _cv2.imread(str(path))
+            if img is None:
+                probs_list.append(np.zeros(num_classes))
+                continue
+            pil = PILImage.fromarray(_cv2.cvtColor(img, _cv2.COLOR_BGR2RGB))
+            tensor = tf(pil).unsqueeze(0).to(DEVICE)
+            with torch.no_grad():
+                p = torch.softmax(model(tensor)[0], dim=0).cpu().numpy()
+            probs_list.append(p)
+        all_probs.append(np.stack(probs_list))  # (N, num_classes)
+    # Average across TTA views
+    return np.mean(all_probs, axis=0)  # (N, num_classes)
 
-model.compile(
-    optimizer=Adam(learning_rate=1e-5),
-    loss='categorical_crossentropy',
-    metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=3, name='top_3_accuracy')]
-)
+# Evaluate on test set with TTA
+all_preds, all_labels_list, top3_correct = [], test_labels.tolist(), 0
+EVAL_BATCH = 32
 
-history_fine = model.fit(
-    train_generator,
-    validation_data=test_generator,
-    epochs=10,
-    callbacks=callbacks
-)
+for start in range(0, len(test_df), EVAL_BATCH):
+    batch = test_df.iloc[start:start+EVAL_BATCH]
+    paths = [DATASET_DIR / row["filename"] for _, row in batch.iterrows()]
+    probs = tta_predict_batch(paths)
+    preds = probs.argmax(1).tolist()
+    all_preds.extend(preds)
+    for p_arr, true_lbl in zip(probs, test_labels[start:start+EVAL_BATCH].tolist()):
+        if true_lbl in p_arr.argsort()[-3:].tolist():
+            top3_correct += 1
+    done = min(start + EVAL_BATCH, len(test_df))
+    print(f"  TTA eval: {done}/{len(test_df)}", end="\r")
 
-# Process no.8: Evaluate Model
-loss, acc, top3_acc = model.evaluate(test_generator)
-print(f"\nTest Accuracy: {acc*100:.2f}%")
-print(f"Top-3 Accuracy: {top3_acc*100:.2f}%")
+print(f"\nTest Accuracy  (TTA): {accuracy(all_preds, all_labels_list)*100:.2f}%")
+print(f"Top-3 Accuracy (TTA): {top3_correct/len(all_labels_list)*100:.2f}%")
 
-# Process no.9A: Confusion Matrix:
-print("Predicting test set...")
-y_pred = model.predict(test_generator, verbose=1)
-print("Prediction complete.")
-y_pred_classes = np.argmax(y_pred, axis=1)
-y_true = test_generator.classes
+target_names = [idx_to_class[i] for i in range(num_classes)]
+report = classification_report(all_labels_list, all_preds,
+                               target_names=target_names, zero_division=0)
+print(report)
+RESULTS_DIR.mkdir(exist_ok=True)
+(RESULTS_DIR / "classification_report.txt").write_text(report)
 
-cm = confusion_matrix(y_true, y_pred_classes)
-plt.figure(figsize=(12, 10))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("True")
-plt.savefig("confusion_matrix.png")
-plt.close()
+cm = confusion_matrix(all_labels_list, all_preds)
+plt.figure(figsize=(14, 12))
+sns.heatmap(cm, annot=False, cmap="Blues")
+plt.title("Confusion Matrix"); plt.xlabel("Predicted"); plt.ylabel("True")
+plt.tight_layout(); plt.savefig(RESULTS_DIR / "confusion_matrix.png", dpi=100); plt.close()
 
-# Process no.9B: Per-Type Evaluation:
-test_df['predicted'] = [label_encoder.classes_[i] for i in y_pred_classes]
-test_df['true'] = [label_encoder.classes_[i] for i in y_true]
-test_df['type'] = test_df['filename'].apply(lambda x: os.path.basename(x).split('.')[0])
-print("\n--- Accuracy by Partial Face Type ---")
-for face_type in test_df['type'].unique():
-    subset = test_df[test_df['type'] == face_type]
-    correct = np.sum(subset['predicted'] == subset['true'])
-    acc = correct / len(subset)
-    print(f"{face_type}: {acc*100:.2f}% accuracy")
+if "transformation" in test_df.columns:
+    results = test_df.assign(pred=all_preds, true=all_labels_list)
+    results["correct"] = results["pred"] == results["true"]
+    print("\n--- Accuracy by Occlusion Type ---")
+    for t in sorted(results["transformation"].unique()):
+        sub = results[results["transformation"] == t]
+        print(f"  {t:<22} {sub['correct'].mean()*100:.1f}%  ({len(sub)} samples)")
 
-# Process no.9C: Learning Curves:
-plt.figure()
-plt.plot(history.history['accuracy'], label='Train Acc')
-plt.plot(history.history['val_accuracy'], label='Val Acc')
-if 'accuracy' in history_fine.history:
-    plt.plot(history_fine.history['accuracy'], label='Fine-tuned Train')
-    plt.plot(history_fine.history['val_accuracy'], label='Fine-tuned Val')
-plt.title('Training Accuracy over Epochs')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.savefig("learning_curve_accuracy.png")
-plt.close()
+# Combined learning curve
+all_h  = {k: history1[k] + history2[k] for k in history1}
+offset = len(history1["train_acc"])
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+for ax, key, title in [(axes[0], "acc", "Accuracy"), (axes[1], "loss", "Loss")]:
+    if all_h[f"train_{key}"]:
+        ax.plot(all_h[f"train_{key}"], label="Train")
+        ax.plot(all_h[f"val_{key}"],   label="Val")
+        if offset > 1:
+            ax.axvline(offset - 1, color="gray", linestyle="--", label="Fine-tune start")
+    ax.set_title(title); ax.set_xlabel("Epoch"); ax.legend()
+plt.tight_layout(); plt.savefig(RESULTS_DIR / "learning_curve_accuracy.png", dpi=100); plt.close()
 
-# Process no.10: Save Model:
-model.save(MODEL_PATH)
-print(f"Model saved to {MODEL_PATH}")
+torch.save({"model_state": model.state_dict(), "class_to_idx": class_to_idx,
+            "idx_to_class": idx_to_class, "num_classes": num_classes}, MODEL_PATH)
+print(f"\nModel : {MODEL_PATH}\nBest  : {BEST_PATH}")
 
-# Process no.11: Predict Image with Top-3 Reference:
-def predict_image(img_path):
-    if not os.path.exists(img_path):
-        print(f"Image not found: {img_path}")
-        return
-    img = cv2.imread(img_path)
-    if img is None:
-        print("Could not read image.")
-        return
-
-    img_resized = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-    img_input = tf.keras.applications.efficientnet.preprocess_input(img_resized)
-    img_input = np.expand_dims(img_input, axis=0)
-    prediction = model.predict(img_input)[0]
-    top3_idx = prediction.argsort()[-3:][::-1]
-
-    print("\nTop-3 Predictions:")
-    for i, idx in enumerate(top3_idx):
-        label = label_encoder.inverse_transform([idx])[0]
-        print(f"{i+1}. {label} ({prediction[idx]*100:.2f}%)")
-
-    predicted_class = label_encoder.inverse_transform([top3_idx[0]])[0]
-    ref_row = df[df['identity'] == predicted_class].iloc[0]
-    ref_img_path = os.path.join(DATASET_DIR, ref_row['filename'])
-    ref_img = cv2.imread(ref_img_path)
-
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.title("Input Image")
-    plt.axis('off')
-
-    plt.subplot(1, 2, 2)
-    if ref_img is not None:
-        plt.imshow(cv2.cvtColor(ref_img, cv2.COLOR_BGR2RGB))
-        plt.title(f"Top-1 Prediction: {predicted_class}")
-    else:
-        plt.title("Reference Not Found")
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig("prediction_result.png")
-    plt.close()
+import json as _json, datetime as _dt
+_hist_path = RESULTS_DIR / "training_history.json"
+_hist = _json.loads(_hist_path.read_text()) if _hist_path.exists() else []
+_hist.append({
+    "run":      len(_hist) + 1,
+    "date":     _dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "script":   "pretrained_model.py",
+    "test_acc": round(accuracy(all_preds, all_labels_list) * 100, 2),
+    "top3_acc": round(top3_correct / len(all_labels_list) * 100, 2),
+    "epochs":   len(history1["train_acc"]) + len(history2["train_acc"]),
+    "notes":    f"Phase 1 ({len(train_df):,} cached) + Phase 2 ({len(orig_train_df):,} originals)",
+})
+_hist_path.write_text(_json.dumps(_hist, indent=2))
+print(f"History saved ({len(_hist)} runs total)")
+gc.collect()

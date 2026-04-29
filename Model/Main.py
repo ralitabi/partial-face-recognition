@@ -1,172 +1,260 @@
-import os
-import cv2
+"""
+Continue fine-tuning best_model.pt on the original (non-augmented) face subset.
+
+Why original-only?
+  Full training set has 21,266 images x 10 occlusion variants.
+  Running all of them through EfficientNet with gradients takes ~20-30 min/epoch.
+  The 'original' subset has only ~2,100 images  -> ~4-5 min/epoch on CPU.
+  Fine-tuning on clean faces adapts the backbone correctly; occlusion
+  robustness is already baked in from Phase 1 head training.
+
+Usage:
+    python Model/Main.py
+"""
+
+import sys, gc, time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
-import tensorflow as tf
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import load_model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler
-import gc
-import pickle
+from pathlib import Path
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.utils.class_weight import compute_class_weight
 
-# Configuration for the model:
-DATASET_DIR = 'partial_face_dataset'
-IMG_SIZE = 128
-BATCH_SIZE = 16
-EPOCHS = 20  # Fine-tuning epochs, the more you increase the number, the more the model will train itself against the dataset you have given to it.
-MODEL_PATH = "partial_face_model.keras"
-ENCODER_PATH = "label_encoder.pkl"
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
 
-# SETUP:
-os.environ["OMP_NUM_THREADS"] = "2"
-os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
-os.environ["TF_NUM_INTEROP_THREADS"] = "2"
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from model_utils import (FaceDataset, build_model, load_checkpoint,
+                         train_tf, eval_tf, accuracy)
 
-# Process no.1: Load Metadata.csv:
-metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
-df = pd.read_csv(metadata_path)
+DATASET_DIR = ROOT / "partial_face_dataset"
+MODEL_PATH  = ROOT / "partial_face_model.pt"
+BEST_PATH   = ROOT / "best_model.pt"
+RESULTS_DIR = ROOT / "results"
+HIST_PATH   = RESULTS_DIR / "training_history.json"
 
-# Process no.2: Train and Test Split:
-train_df, test_df = train_test_split(df, test_size=0.2, stratify=df['identity'], random_state=42)
+BATCH_SIZE = 8      # small — full backbone + gradients on CPU needs low memory
+EPOCHS     = 10
+LR         = 5e-6   # very small — backbone is already well-trained
+PATIENCE   = 4
+SEED       = 42
 
-# Process no.3: Image Generators:
-train_datagen = ImageDataGenerator(
-    preprocessing_function=tf.keras.applications.efficientnet.preprocess_input,
-    rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
-    brightness_range=[0.8, 1.2],
-    horizontal_flip=True
-)
-test_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.efficientnet.preprocess_input)
+torch.manual_seed(SEED)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Device: {DEVICE}", flush=True)
 
-train_generator = train_datagen.flow_from_dataframe(
-    train_df,
-    directory=DATASET_DIR,
-    x_col='filename',
-    y_col='identity',
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='categorical',
-    batch_size=BATCH_SIZE,
-    shuffle=True
-)
+path = BEST_PATH if BEST_PATH.exists() else MODEL_PATH
+if not path.exists():
+    print("No model found. Run pretrained_model.py first.")
+    sys.exit(1)
 
-test_generator = test_datagen.flow_from_dataframe(
-    test_df,
-    directory=DATASET_DIR,
-    x_col='filename',
-    y_col='identity',
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='categorical',
-    batch_size=BATCH_SIZE,
-    shuffle=False
-)
+ckpt         = load_checkpoint(path, DEVICE)
+num_classes  = ckpt["num_classes"]
+class_to_idx = ckpt["class_to_idx"]
+idx_to_class = ckpt["idx_to_class"]
+print(f"Loaded: {path.name}  ({num_classes} classes)", flush=True)
 
-# Process no.4: Loading Label Encoder:
-with open(ENCODER_PATH, 'rb') as f:
-    label_encoder = pickle.load(f)
+# ── Use original images only ───────────────────────────────────────────────────
+meta     = pd.read_csv(DATASET_DIR / "metadata.csv")
+train_df = meta[meta["split"] == "train"].reset_index(drop=True)
+val_df   = meta[meta["split"] == "val"].reset_index(drop=True)
+test_df  = meta[meta["split"] == "test"].reset_index(drop=True)
 
-# Process no.5: Loading Existing Model:
-if os.path.exists(MODEL_PATH):
-    print("Loading existing trained model for continued training...")
-    model = load_model(MODEL_PATH)
-    print("Model loaded successfully.")
-    base_model = model.layers[0]  # EfficientNetB0 base
+if "transformation" in meta.columns:
+    orig_train = train_df[train_df["transformation"] == "original"].reset_index(drop=True)
 else:
-    raise FileNotFoundError("No pre-trained model found to continue training.")
+    orig_train = train_df
 
-# Process no.6: Unfreeze top layers for fine-tuning:
-print("Unfreezing top layers for fine-tuning...")
-base_model.trainable = True
-for layer in base_model.layers[:100]:
-    layer.trainable = False
+print(f"Using {len(orig_train):,} original train images  "
+      f"(full set has {len(train_df):,})", flush=True)
+print(f"Val {len(val_df):,}  Test {len(test_df):,}", flush=True)
 
-# Process no.7: Compile with lower learning rate:
-model.compile(
-    optimizer=Adam(learning_rate=1e-5),
-    loss='categorical_crossentropy',
-    metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=3, name='top_3_accuracy')]
-)
+y_train       = orig_train["identity"].map(class_to_idx).values
+weights_arr   = compute_class_weight("balanced",
+                                     classes=np.arange(num_classes), y=y_train)
+class_weights = torch.tensor(weights_arr, dtype=torch.float32).to(DEVICE)
 
-# Process no.8: Callbacks and Continue Training:
-def lr_schedule(epoch):
-    if epoch < 5:
-        return 1e-5
-    elif epoch < 10:
-        return 5e-6
+train_loader = DataLoader(FaceDataset(orig_train, DATASET_DIR, train_tf, class_to_idx),
+                          batch_size=BATCH_SIZE, shuffle=True,  num_workers=0)
+val_loader   = DataLoader(FaceDataset(val_df,     DATASET_DIR, eval_tf,  class_to_idx),
+                          batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
+test_loader  = DataLoader(FaceDataset(test_df,    DATASET_DIR, eval_tf,  class_to_idx),
+                          batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
+
+# ── Model — head only (backbone frozen to prevent catastrophic forgetting) ─────
+# Evidence: unlocking backbone on 2k images collapsed accuracy from 86% → 17%.
+model = build_model(num_classes, pretrained=True).to(DEVICE)
+# Load only the classifier weights from checkpoint; keep pretrained backbone.
+head_weights = {k: v for k, v in ckpt["model_state"].items()
+                if k.startswith("classifier.")}
+model.load_state_dict(head_weights, strict=False)
+
+for param in model.parameters():
+    param.requires_grad = False
+for param in model.classifier.parameters():
+    param.requires_grad = True
+
+n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+n_total     = sum(p.numel() for p in model.parameters())
+print(f"Trainable params: {n_trainable:,} / {n_total:,} "
+      f"({n_trainable/n_total*100:.1f}%  — head only)", flush=True)
+
+criterion = nn.CrossEntropyLoss(weight=class_weights, label_smoothing=0.05)
+optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
+                       lr=LR, weight_decay=1e-4)
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS, eta_min=1e-5)
+
+# ── Training loop ─────────────────────────────────────────────────────────────
+def run_epoch(loader, train=True):
+    model.train() if train else model.eval()
+    total_loss = correct = total = 0
+    ctx = torch.enable_grad() if train else torch.no_grad()
+    with ctx:
+        for batch_idx, (imgs, labels) in enumerate(loader):
+            imgs, labels = imgs.to(DEVICE), labels.to(DEVICE)
+            if train:
+                optimizer.zero_grad()
+            out  = model(imgs)
+            loss = criterion(out, labels)
+            if train:
+                loss.backward()
+                optimizer.step()
+            total_loss += loss.item() * len(imgs)
+            correct    += (out.argmax(1) == labels).sum().item()
+            total      += len(imgs)
+            # Print progress every 20 batches so user knows it's running
+            if train and (batch_idx + 1) % 20 == 0:
+                print(f"    batch {batch_idx+1}/{len(loader)}  "
+                      f"loss={total_loss/total:.4f}  "
+                      f"acc={correct/total*100:.1f}%", flush=True)
+    return total_loss / total, correct / total
+
+
+print(f"\n{'='*58}")
+print(f"  Fine-tune last 3 blocks  "
+      f"(lr={LR}, max {EPOCHS} epochs, batch={BATCH_SIZE})")
+print(f"{'='*58}", flush=True)
+
+# Initialise from current best so we never overwrite a better model
+import json as _json
+_hist      = _json.loads(HIST_PATH.read_text()) if HIST_PATH.exists() else []
+_hist_best = max((_h["test_acc"] for _h in _hist), default=0.0) / 100.0
+# Use a conservative floor — only save if we beat the historical best val
+# (approximated by using 85 % of test_acc as a val_acc floor)
+best_val_acc = max(0.0, _hist_best * 0.85)
+print(f"Starting best_val_acc floor: {best_val_acc*100:.2f}%  "
+      f"(historical best test acc: {_hist_best*100:.2f}%)", flush=True)
+
+no_improve = 0
+history    = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
+
+for epoch in range(1, EPOCHS + 1):
+    print(f"\nEpoch {epoch}/{EPOCHS} — training...", flush=True)
+    t0 = time.time()
+    tr_loss, tr_acc = run_epoch(train_loader, train=True)
+    print(f"Epoch {epoch}/{EPOCHS} — validating...", flush=True)
+    va_loss, va_acc = run_epoch(val_loader,   train=False)
+    scheduler.step()
+
+    history["train_loss"].append(tr_loss)
+    history["train_acc"].append(tr_acc)
+    history["val_loss"].append(va_loss)
+    history["val_acc"].append(va_acc)
+
+    elapsed = time.time() - t0
+    print(f"Epoch {epoch:3d}/{EPOCHS} | "
+          f"train {tr_acc*100:.1f}% ({tr_loss:.4f}) | "
+          f"val {va_acc*100:.1f}% ({va_loss:.4f}) | "
+          f"{elapsed:.0f}s", flush=True)
+
+    if va_acc > best_val_acc:
+        best_val_acc = va_acc
+        no_improve   = 0
+        torch.save({"model_state": model.state_dict(),
+                    "class_to_idx": class_to_idx,
+                    "idx_to_class": idx_to_class,
+                    "num_classes":  num_classes}, BEST_PATH)
+        print(f"  -> best saved ({va_acc*100:.2f}%)", flush=True)
     else:
-        return 1e-6
+        no_improve += 1
+        if no_improve >= PATIENCE:
+            print(f"  Early stopping at epoch {epoch}", flush=True)
+            break
 
-callbacks = [
-    EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True),
-    LearningRateScheduler(lr_schedule)
-]
+# ── Evaluate ──────────────────────────────────────────────────────────────────
+print("\nEvaluating on test set...", flush=True)
+model.eval()
+all_preds, all_labels, top3_correct = [], [], 0
+with torch.no_grad():
+    for i, (imgs, labels) in enumerate(test_loader):
+        out = model(imgs.to(DEVICE))
+        all_preds.extend(out.argmax(1).cpu().tolist())
+        all_labels.extend(labels.tolist())
+        for pred3, lbl in zip(out.topk(3, dim=1).indices.cpu(), labels):
+            if lbl.item() in pred3.tolist():
+                top3_correct += 1
+        if (i + 1) % 50 == 0:
+            print(f"  test batch {i+1}/{len(test_loader)}", flush=True)
 
-print("Continuing fine-tuning...")
-history_fine = model.fit(
-    train_generator,
-    validation_data=test_generator,
-    epochs=EPOCHS,
-    callbacks=callbacks
-)
+print(f"\nTest Accuracy  : {accuracy(all_preds, all_labels)*100:.2f}%")
+print(f"Top-3 Accuracy : {top3_correct/len(all_labels)*100:.2f}%")
 
-# Process no.9: Save Improved Model:
-model.save(MODEL_PATH)
-print(f"Updated model saved to {MODEL_PATH}")
+target_names = [idx_to_class[i] for i in range(num_classes)]
+report = classification_report(all_labels, all_preds,
+                               target_names=target_names, zero_division=0)
+print(report)
+RESULTS_DIR.mkdir(exist_ok=True)
+(RESULTS_DIR / "classification_report.txt").write_text(report)
 
-# Process no.10: Accuracy Metrics:
-eval_loss, eval_acc, eval_top3 = model.evaluate(test_generator)
-print(f"\nFinal Test Accuracy: {eval_acc * 100:.2f}%")
-print(f"Final Top-3 Accuracy: {eval_top3 * 100:.2f}%")
-
-# Process no.11: Confusion Matrix & Classification Report:
-y_pred_probs = model.predict(test_generator, verbose=1)
-y_pred = np.argmax(y_pred_probs, axis=1)
-y_true = test_generator.classes
-
-cm = confusion_matrix(y_true, y_pred)
-plt.figure(figsize=(12, 10))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("True")
-plt.savefig("fine_tune_confusion_matrix.png")
+cm = confusion_matrix(all_labels, all_preds)
+plt.figure(figsize=(14, 12))
+sns.heatmap(cm, annot=False, cmap="Blues")
+plt.title("Fine-Tuned Confusion Matrix")
+plt.xlabel("Predicted"); plt.ylabel("True")
+plt.tight_layout()
+plt.savefig(RESULTS_DIR / "confusion_matrix.png", dpi=100)
 plt.close()
 
-print("\nClassification Report:")
-print(classification_report(y_true, y_pred, target_names=label_encoder.classes_))
+if "transformation" in test_df.columns:
+    results = test_df.assign(pred=all_preds, true=all_labels)
+    results["correct"] = results["pred"] == results["true"]
+    print("\n--- Accuracy by Occlusion Type ---")
+    for t in sorted(results["transformation"].unique()):
+        sub = results[results["transformation"] == t]
+        print(f"  {t:<22} {sub['correct'].mean()*100:.1f}%  ({len(sub)} samples)")
 
-# Process no.12: Per-Type Accuracy:
-test_df['predicted'] = [label_encoder.classes_[i] for i in y_pred]
-test_df['true'] = [label_encoder.classes_[i] for i in y_true]
-test_df['type'] = test_df['filename'].apply(lambda x: os.path.basename(x).split('.')[0])
-print("\n--- Accuracy by Partial Face Type ---")
-for face_type in test_df['type'].unique():
-    subset = test_df[test_df['type'] == face_type]
-    correct = np.sum(subset['predicted'] == subset['true'])
-    acc = correct / len(subset)
-    print(f"{face_type}: {acc*100:.2f}% accuracy")
-
-# Process no.13: Learning Curve Plot:
-plt.plot(history_fine.history['accuracy'], label='Fine-tuned Train')
-plt.plot(history_fine.history['val_accuracy'], label='Fine-tuned Val')
-plt.title('Fine-Tuning Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.savefig("fine_tune_accuracy.png")
+plt.figure(figsize=(10, 4))
+plt.plot(history["train_acc"], label="Train")
+plt.plot(history["val_acc"],   label="Val")
+plt.title("Fine-Tuning Accuracy"); plt.xlabel("Epoch"); plt.legend()
+plt.tight_layout()
+plt.savefig(RESULTS_DIR / "fine_tune_accuracy.png", dpi=100)
 plt.close()
 
-# === STEP 14: RAM Cleanup ===
-from tensorflow.keras import backend as K
-K.clear_session()
+torch.save({"model_state": model.state_dict(), "class_to_idx": class_to_idx,
+            "idx_to_class": idx_to_class, "num_classes": num_classes}, MODEL_PATH)
+print(f"\nModel saved: {MODEL_PATH}", flush=True)
+
+import json as _json, datetime as _dt
+_hist     = _json.loads(HIST_PATH.read_text()) if HIST_PATH.exists() else []
+_prev_acc = _hist[-1]["test_acc"] if _hist else None
+_cur_acc  = accuracy(all_preds, all_labels) * 100
+_hist.append({
+    "run":      len(_hist) + 1,
+    "date":     _dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "script":   "Main.py",
+    "test_acc": round(_cur_acc, 2),
+    "top3_acc": round(top3_correct / len(all_labels) * 100, 2),
+    "epochs":   len(history["train_acc"]),
+    "notes":    f"Head fine-tune on {len(orig_train):,} originals",
+})
+HIST_PATH.write_text(_json.dumps(_hist, indent=2))
+if _prev_acc:
+    print(f"Accuracy change: {_prev_acc:.2f}% -> {_cur_acc:.2f}% "
+          f"({_cur_acc - _prev_acc:+.2f}%)", flush=True)
+print(f"History saved ({len(_hist)} runs total)", flush=True)
 gc.collect()

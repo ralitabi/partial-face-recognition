@@ -1,77 +1,98 @@
-import os
-import cv2
+"""
+Predict identity from a partial face image.
+
+Usage:
+    python Model/predict.py <image_path>
+    python Model/predict.py          # auto-picks first test image
+"""
+
+import os, sys
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import cv2
 import matplotlib.pyplot as plt
-import pickle
+from pathlib import Path
 
-# Configuration:
-MODEL_PATH = "partial_face_model.keras"
-ENCODER_PATH = "label_encoder.pkl"
-DATASET_DIR = "partial_face_dataset"
-IMG_SIZE = 128
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from model_utils import load_model_from_checkpoint, eval_tf
 
-# Loading model and encoder:
-model = tf.keras.models.load_model(MODEL_PATH)
-with open(ENCODER_PATH, 'rb') as f:
-    label_encoder = pickle.load(f)
+import torch
+from PIL import Image
 
-# Loading metadata for reference image:
-metadata_path = os.path.join(DATASET_DIR, 'metadata.csv')
-df = pd.read_csv(metadata_path)
+BEST_PATH   = ROOT / "best_model.pt"
+MODEL_PATH  = ROOT / "partial_face_model.pt"
+DATASET_DIR = ROOT / "partial_face_dataset"
+TOP_K       = 5
 
-# Prediction Function:
-def predict_image(img_path):
-    if not os.path.exists(img_path):
-        print(f"Image not found: {img_path}")
+_model        = None
+_idx_to_class = None
+_lookup       = None   # (identity, transformation) -> filename
+
+
+def _ensure_loaded():
+    global _model, _idx_to_class, _lookup
+    if _model is not None:
         return
+    path = BEST_PATH if BEST_PATH.exists() else MODEL_PATH
+    if not path.exists():
+        sys.exit("[ERROR] No model found. Run: python Model/pretrained_model.py")
+    _model, _idx_to_class = load_model_from_checkpoint(str(path))
+    df      = pd.read_csv(DATASET_DIR / "metadata.csv")
+    _lookup = df.set_index(["identity", "transformation"])["filename"].to_dict()
 
-    img = cv2.imread(img_path)
-    if img is None:
-        print("Could not read image.")
-        return
 
-    # Resize and preprocess:
-    img_resized = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-    img_input = tf.keras.applications.efficientnet.preprocess_input(img_resized)
-    img_input = np.expand_dims(img_input, axis=0)
+def predict(img_path: str) -> list:
+    _ensure_loaded()
+    img_bgr = cv2.imread(img_path)
+    if img_bgr is None:
+        print(f"[ERROR] Cannot read: {img_path}")
+        return []
 
-    # Make prediction:
-    prediction = model.predict(img_input)[0]
-    top3_idx = prediction.argsort()[-3:][::-1]
+    pil_img = Image.fromarray(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
+    tensor  = eval_tf(pil_img).unsqueeze(0)
 
-    print("\nTop-3 Predictions:")
-    for i, idx in enumerate(top3_idx):
-        label = label_encoder.inverse_transform([idx])[0]
-        confidence = prediction[idx] * 100
-        print(f"{i+1}. {label} ({confidence:.2f}%)")
+    with torch.no_grad():
+        probs = torch.softmax(_model(tensor)[0], dim=0).numpy()
 
-    # Display result:
-    predicted_class = label_encoder.inverse_transform([top3_idx[0]])[0]
-    ref_row = df[df['identity'] == predicted_class].iloc[0]
-    ref_img_path = os.path.join(DATASET_DIR, ref_row['filename'])
-    ref_img = cv2.imread(ref_img_path)
+    top_idx = probs.argsort()[-TOP_K:][::-1]
+    results = [(_idx_to_class[i], float(probs[i])) for i in top_idx]
 
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.title("Input Image")
-    plt.axis('off')
+    print(f"\nFile : {img_path}")
+    print(f"{'Rank':<5} {'Identity':<40} Confidence")
+    print("-" * 60)
+    for rank, (name, conf) in enumerate(results, 1):
+        print(f"  {rank}    {name:<40} {conf*100:6.2f}%  {'#'*int(conf*25)}")
 
-    plt.subplot(1, 2, 2)
+    best     = results[0][0]
+    ref_file = _lookup.get((best, "original"))
+    ref_img  = cv2.imread(str(DATASET_DIR / ref_file)) if ref_file else None
+
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    axes[0].imshow(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
+    axes[0].set_title("Input Image"); axes[0].axis("off")
     if ref_img is not None:
-        plt.imshow(cv2.cvtColor(ref_img, cv2.COLOR_BGR2RGB))
-        plt.title(f"Top-1 Prediction: {predicted_class}")
+        axes[1].imshow(cv2.cvtColor(ref_img, cv2.COLOR_BGR2RGB))
+        axes[1].set_title(f"Best Match\n{best[:30]}")
     else:
-        plt.title("Reference Not Found")
-    plt.axis('off')
-
+        axes[1].set_title("No reference found")
+    axes[1].axis("off")
+    plt.suptitle(f"Top-1: {best} ({results[0][1]*100:.1f}%)")
     plt.tight_layout()
-    plt.savefig("prediction_result.png")
+    plt.savefig("prediction_result.png", dpi=120)
     plt.close()
-    print("Prediction image saved as prediction_result.png")
+    print("Saved: prediction_result.png")
+    return results
 
-# How to use it?
-# Replace this path with an image you want to test in the inverted commas.
-predict_image("partial_face_dataset/id_0150/top_crop.jpg")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        predict(sys.argv[1])
+    else:
+        _ensure_loaded()
+        df   = pd.read_csv(DATASET_DIR / "metadata.csv")
+        rows = df[df["split"] == "test"] if "split" in df.columns else df
+        if rows.empty:
+            print("Pass an image path as argument.")
+        else:
+            predict(str(DATASET_DIR / rows.iloc[0]["filename"]))

@@ -1,0 +1,2262 @@
+[
+  {
+    "run": 1,
+    "date": "2026-04-25 09:30",
+    "script": "pretrained_model.py",
+    "phase": "Head (cached features)",
+    "test_acc": 86.86,
+    "top3_acc": 93.86,
+    "epochs": 80,
+    "notes": "Phase 1 only \u2014 backbone frozen"
+  },
+  {
+    "run": 2,
+    "date": "2026-04-25 23:55",
+    "script": "night_train.py",
+    "test_acc": 87.36,
+    "top3_acc": 94.29,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 3,
+    "date": "2026-04-26 00:01",
+    "script": "night_train.py",
+    "test_acc": 87.76,
+    "top3_acc": 94.47,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 4,
+    "date": "2026-04-26 00:02",
+    "script": "night_train.py",
+    "test_acc": 86.57,
+    "top3_acc": 93.79,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 5,
+    "date": "2026-04-26 00:07",
+    "script": "night_train.py",
+    "test_acc": 87.93,
+    "top3_acc": 94.27,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 6,
+    "date": "2026-04-26 00:08",
+    "script": "night_train.py",
+    "test_acc": 85.45,
+    "top3_acc": 93.33,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 7,
+    "date": "2026-04-26 00:09",
+    "script": "night_train.py",
+    "test_acc": 85.12,
+    "top3_acc": 93.31,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 8,
+    "date": "2026-04-26 00:14",
+    "script": "night_train.py",
+    "test_acc": 87.8,
+    "top3_acc": 94.29,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 9,
+    "date": "2026-04-26 00:16",
+    "script": "night_train.py",
+    "test_acc": 86.7,
+    "top3_acc": 93.97,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 10,
+    "date": "2026-04-26 00:20",
+    "script": "night_train.py",
+    "test_acc": 86.92,
+    "top3_acc": 94.18,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 11,
+    "date": "2026-04-26 00:21",
+    "script": "night_train.py",
+    "test_acc": 85.93,
+    "top3_acc": 93.83,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 12,
+    "date": "2026-04-26 00:23",
+    "script": "night_train.py",
+    "test_acc": 85.3,
+    "top3_acc": 93.57,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 13,
+    "date": "2026-04-26 00:28",
+    "script": "night_train.py",
+    "test_acc": 87.43,
+    "top3_acc": 93.94,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 14,
+    "date": "2026-04-26 00:32",
+    "script": "night_train.py",
+    "test_acc": 86.59,
+    "top3_acc": 93.86,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 15,
+    "date": "2026-04-26 00:37",
+    "script": "night_train.py",
+    "test_acc": 87.8,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 16,
+    "date": "2026-04-26 00:39",
+    "script": "night_train.py",
+    "test_acc": 84.97,
+    "top3_acc": 93.09,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 17,
+    "date": "2026-04-26 00:44",
+    "script": "night_train.py",
+    "test_acc": 87.34,
+    "top3_acc": 94.12,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 18,
+    "date": "2026-04-26 00:46",
+    "script": "night_train.py",
+    "test_acc": 85.25,
+    "top3_acc": 93.46,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 19,
+    "date": "2026-04-26 00:47",
+    "script": "night_train.py",
+    "test_acc": 86.31,
+    "top3_acc": 93.66,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 20,
+    "date": "2026-04-26 00:52",
+    "script": "night_train.py",
+    "test_acc": 87.65,
+    "top3_acc": 94.8,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 21,
+    "date": "2026-04-26 00:59",
+    "script": "night_train.py",
+    "test_acc": 87.27,
+    "top3_acc": 94.25,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 22,
+    "date": "2026-04-26 01:04",
+    "script": "night_train.py",
+    "test_acc": 87.97,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 23,
+    "date": "2026-04-26 01:10",
+    "script": "night_train.py",
+    "test_acc": 88.11,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 24,
+    "date": "2026-04-26 01:11",
+    "script": "night_train.py",
+    "test_acc": 86.72,
+    "top3_acc": 94.03,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 25,
+    "date": "2026-04-26 01:17",
+    "script": "night_train.py",
+    "test_acc": 87.84,
+    "top3_acc": 94.49,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 26,
+    "date": "2026-04-26 01:18",
+    "script": "night_train.py",
+    "test_acc": 85.41,
+    "top3_acc": 93.18,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 27,
+    "date": "2026-04-26 01:22",
+    "script": "night_train.py",
+    "test_acc": 88.11,
+    "top3_acc": 94.47,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 28,
+    "date": "2026-04-26 01:23",
+    "script": "night_train.py",
+    "test_acc": 86.07,
+    "top3_acc": 93.97,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 29,
+    "date": "2026-04-26 01:26",
+    "script": "night_train.py",
+    "test_acc": 87.93,
+    "top3_acc": 94.4,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 30,
+    "date": "2026-04-26 01:29",
+    "script": "night_train.py",
+    "test_acc": 87.78,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 31,
+    "date": "2026-04-26 01:32",
+    "script": "night_train.py",
+    "test_acc": 88.35,
+    "top3_acc": 94.38,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 32,
+    "date": "2026-04-26 01:36",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 33,
+    "date": "2026-04-26 01:38",
+    "script": "night_train.py",
+    "test_acc": 87.65,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 34,
+    "date": "2026-04-26 01:39",
+    "script": "night_train.py",
+    "test_acc": 87.16,
+    "top3_acc": 94.03,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 35,
+    "date": "2026-04-26 01:40",
+    "script": "night_train.py",
+    "test_acc": 85.32,
+    "top3_acc": 93.13,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 36,
+    "date": "2026-04-26 01:41",
+    "script": "night_train.py",
+    "test_acc": 85.71,
+    "top3_acc": 93.35,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 37,
+    "date": "2026-04-26 01:45",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 38,
+    "date": "2026-04-26 01:45",
+    "script": "night_train.py",
+    "test_acc": 86.46,
+    "top3_acc": 93.7,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 39,
+    "date": "2026-04-26 01:46",
+    "script": "night_train.py",
+    "test_acc": 86.83,
+    "top3_acc": 94.12,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 40,
+    "date": "2026-04-26 01:49",
+    "script": "night_train.py",
+    "test_acc": 87.67,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 41,
+    "date": "2026-04-26 01:50",
+    "script": "night_train.py",
+    "test_acc": 84.97,
+    "top3_acc": 92.8,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 42,
+    "date": "2026-04-26 01:51",
+    "script": "night_train.py",
+    "test_acc": 85.25,
+    "top3_acc": 92.93,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 43,
+    "date": "2026-04-26 01:52",
+    "script": "night_train.py",
+    "test_acc": 86.48,
+    "top3_acc": 93.64,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 44,
+    "date": "2026-04-26 01:53",
+    "script": "night_train.py",
+    "test_acc": 87.25,
+    "top3_acc": 94.05,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 45,
+    "date": "2026-04-26 01:56",
+    "script": "night_train.py",
+    "test_acc": 88.08,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 46,
+    "date": "2026-04-26 01:56",
+    "script": "night_train.py",
+    "test_acc": 86.13,
+    "top3_acc": 93.24,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 47,
+    "date": "2026-04-26 01:59",
+    "script": "night_train.py",
+    "test_acc": 87.43,
+    "top3_acc": 94.21,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 48,
+    "date": "2026-04-26 02:00",
+    "script": "night_train.py",
+    "test_acc": 86.88,
+    "top3_acc": 93.7,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 49,
+    "date": "2026-04-26 02:01",
+    "script": "night_train.py",
+    "test_acc": 86.28,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 50,
+    "date": "2026-04-26 02:04",
+    "script": "night_train.py",
+    "test_acc": 88.55,
+    "top3_acc": 94.32,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 51,
+    "date": "2026-04-26 02:04",
+    "script": "night_train.py",
+    "test_acc": 85.87,
+    "top3_acc": 93.59,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 52,
+    "date": "2026-04-26 02:08",
+    "script": "night_train.py",
+    "test_acc": 88.46,
+    "top3_acc": 94.65,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 53,
+    "date": "2026-04-26 02:09",
+    "script": "night_train.py",
+    "test_acc": 86.53,
+    "top3_acc": 93.59,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 54,
+    "date": "2026-04-26 02:10",
+    "script": "night_train.py",
+    "test_acc": 87.49,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 55,
+    "date": "2026-04-26 02:13",
+    "script": "night_train.py",
+    "test_acc": 88.35,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 56,
+    "date": "2026-04-26 02:13",
+    "script": "night_train.py",
+    "test_acc": 85.47,
+    "top3_acc": 93.79,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 57,
+    "date": "2026-04-26 02:14",
+    "script": "night_train.py",
+    "test_acc": 85.93,
+    "top3_acc": 93.99,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 58,
+    "date": "2026-04-26 02:18",
+    "script": "night_train.py",
+    "test_acc": 88.26,
+    "top3_acc": 94.71,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 59,
+    "date": "2026-04-26 02:19",
+    "script": "night_train.py",
+    "test_acc": 87.47,
+    "top3_acc": 94.14,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 60,
+    "date": "2026-04-26 02:20",
+    "script": "night_train.py",
+    "test_acc": 85.41,
+    "top3_acc": 92.85,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 61,
+    "date": "2026-04-26 02:21",
+    "script": "night_train.py",
+    "test_acc": 85.34,
+    "top3_acc": 93.15,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 62,
+    "date": "2026-04-26 02:24",
+    "script": "night_train.py",
+    "test_acc": 88.08,
+    "top3_acc": 94.47,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 63,
+    "date": "2026-04-26 02:25",
+    "script": "night_train.py",
+    "test_acc": 86.42,
+    "top3_acc": 93.86,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 64,
+    "date": "2026-04-26 02:26",
+    "script": "night_train.py",
+    "test_acc": 87.34,
+    "top3_acc": 94.1,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 65,
+    "date": "2026-04-26 02:30",
+    "script": "night_train.py",
+    "test_acc": 88.22,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 66,
+    "date": "2026-04-26 02:33",
+    "script": "night_train.py",
+    "test_acc": 87.91,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 67,
+    "date": "2026-04-26 02:34",
+    "script": "night_train.py",
+    "test_acc": 85.23,
+    "top3_acc": 93.33,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 68,
+    "date": "2026-04-26 02:34",
+    "script": "night_train.py",
+    "test_acc": 86.75,
+    "top3_acc": 94.01,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 69,
+    "date": "2026-04-26 02:36",
+    "script": "night_train.py",
+    "test_acc": 87.95,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 70,
+    "date": "2026-04-26 02:40",
+    "script": "night_train.py",
+    "test_acc": 88.37,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 71,
+    "date": "2026-04-26 02:40",
+    "script": "night_train.py",
+    "test_acc": 85.93,
+    "top3_acc": 93.53,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 72,
+    "date": "2026-04-26 02:41",
+    "script": "night_train.py",
+    "test_acc": 85.82,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 73,
+    "date": "2026-04-26 02:44",
+    "script": "night_train.py",
+    "test_acc": 88.55,
+    "top3_acc": 94.82,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 74,
+    "date": "2026-04-26 02:48",
+    "script": "night_train.py",
+    "test_acc": 88.13,
+    "top3_acc": 94.56,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 75,
+    "date": "2026-04-26 02:49",
+    "script": "night_train.py",
+    "test_acc": 85.19,
+    "top3_acc": 93.39,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 76,
+    "date": "2026-04-26 02:53",
+    "script": "night_train.py",
+    "test_acc": 88.19,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 77,
+    "date": "2026-04-26 02:56",
+    "script": "night_train.py",
+    "test_acc": 88.08,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 78,
+    "date": "2026-04-26 02:57",
+    "script": "night_train.py",
+    "test_acc": 87.14,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 79,
+    "date": "2026-04-26 02:58",
+    "script": "night_train.py",
+    "test_acc": 86.94,
+    "top3_acc": 94.1,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 80,
+    "date": "2026-04-26 03:01",
+    "script": "night_train.py",
+    "test_acc": 88.19,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 81,
+    "date": "2026-04-26 03:02",
+    "script": "night_train.py",
+    "test_acc": 85.98,
+    "top3_acc": 93.48,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 82,
+    "date": "2026-04-26 03:04",
+    "script": "night_train.py",
+    "test_acc": 86.07,
+    "top3_acc": 93.53,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 83,
+    "date": "2026-04-26 03:05",
+    "script": "night_train.py",
+    "test_acc": 86.92,
+    "top3_acc": 93.44,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 84,
+    "date": "2026-04-26 03:06",
+    "script": "night_train.py",
+    "test_acc": 87.12,
+    "top3_acc": 94.18,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 85,
+    "date": "2026-04-26 03:09",
+    "script": "night_train.py",
+    "test_acc": 88.17,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 86,
+    "date": "2026-04-26 03:13",
+    "script": "night_train.py",
+    "test_acc": 88.11,
+    "top3_acc": 94.71,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 87,
+    "date": "2026-04-26 03:16",
+    "script": "night_train.py",
+    "test_acc": 88.28,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 88,
+    "date": "2026-04-26 03:19",
+    "script": "night_train.py",
+    "test_acc": 88.55,
+    "top3_acc": 94.76,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 89,
+    "date": "2026-04-26 03:20",
+    "script": "night_train.py",
+    "test_acc": 87.21,
+    "top3_acc": 93.86,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 90,
+    "date": "2026-04-26 03:23",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.87,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 91,
+    "date": "2026-04-26 03:28",
+    "script": "night_train.py",
+    "test_acc": 87.8,
+    "top3_acc": 94.47,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 92,
+    "date": "2026-04-26 03:31",
+    "script": "night_train.py",
+    "test_acc": 88.0,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 93,
+    "date": "2026-04-26 03:31",
+    "script": "night_train.py",
+    "test_acc": 86.79,
+    "top3_acc": 93.79,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 94,
+    "date": "2026-04-26 03:32",
+    "script": "night_train.py",
+    "test_acc": 87.07,
+    "top3_acc": 94.27,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 95,
+    "date": "2026-04-26 03:33",
+    "script": "night_train.py",
+    "test_acc": 85.23,
+    "top3_acc": 93.26,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 96,
+    "date": "2026-04-26 03:37",
+    "script": "night_train.py",
+    "test_acc": 88.02,
+    "top3_acc": 94.65,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 97,
+    "date": "2026-04-26 03:38",
+    "script": "night_train.py",
+    "test_acc": 86.42,
+    "top3_acc": 93.77,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 98,
+    "date": "2026-04-26 03:42",
+    "script": "night_train.py",
+    "test_acc": 88.5,
+    "top3_acc": 94.71,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 99,
+    "date": "2026-04-26 03:44",
+    "script": "night_train.py",
+    "test_acc": 86.97,
+    "top3_acc": 94.27,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 100,
+    "date": "2026-04-26 03:47",
+    "script": "night_train.py",
+    "test_acc": 88.37,
+    "top3_acc": 94.56,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 101,
+    "date": "2026-04-26 03:50",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.67,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 102,
+    "date": "2026-04-26 03:53",
+    "script": "night_train.py",
+    "test_acc": 87.89,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 103,
+    "date": "2026-04-26 03:54",
+    "script": "night_train.py",
+    "test_acc": 86.72,
+    "top3_acc": 93.92,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 104,
+    "date": "2026-04-26 03:55",
+    "script": "night_train.py",
+    "test_acc": 87.65,
+    "top3_acc": 94.01,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 105,
+    "date": "2026-04-26 03:58",
+    "script": "night_train.py",
+    "test_acc": 88.55,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 106,
+    "date": "2026-04-26 03:59",
+    "script": "night_train.py",
+    "test_acc": 86.15,
+    "top3_acc": 93.55,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 107,
+    "date": "2026-04-26 04:02",
+    "script": "night_train.py",
+    "test_acc": 88.02,
+    "top3_acc": 94.73,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 108,
+    "date": "2026-04-26 04:02",
+    "script": "night_train.py",
+    "test_acc": 86.46,
+    "top3_acc": 93.66,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 109,
+    "date": "2026-04-26 04:03",
+    "script": "night_train.py",
+    "test_acc": 86.57,
+    "top3_acc": 93.72,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 110,
+    "date": "2026-04-26 04:07",
+    "script": "night_train.py",
+    "test_acc": 87.76,
+    "top3_acc": 94.4,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 111,
+    "date": "2026-04-26 04:07",
+    "script": "night_train.py",
+    "test_acc": 85.52,
+    "top3_acc": 93.33,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 112,
+    "date": "2026-04-26 04:08",
+    "script": "night_train.py",
+    "test_acc": 85.28,
+    "top3_acc": 93.5,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 113,
+    "date": "2026-04-26 04:11",
+    "script": "night_train.py",
+    "test_acc": 88.57,
+    "top3_acc": 94.58,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 114,
+    "date": "2026-04-26 04:12",
+    "script": "night_train.py",
+    "test_acc": 87.82,
+    "top3_acc": 94.21,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 115,
+    "date": "2026-04-26 04:15",
+    "script": "night_train.py",
+    "test_acc": 88.26,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 116,
+    "date": "2026-04-26 04:19",
+    "script": "night_train.py",
+    "test_acc": 88.04,
+    "top3_acc": 94.4,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 117,
+    "date": "2026-04-26 04:19",
+    "script": "night_train.py",
+    "test_acc": 85.49,
+    "top3_acc": 92.82,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 118,
+    "date": "2026-04-26 04:20",
+    "script": "night_train.py",
+    "test_acc": 86.77,
+    "top3_acc": 93.9,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 119,
+    "date": "2026-04-26 04:21",
+    "script": "night_train.py",
+    "test_acc": 87.23,
+    "top3_acc": 94.03,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 120,
+    "date": "2026-04-26 04:24",
+    "script": "night_train.py",
+    "test_acc": 88.46,
+    "top3_acc": 94.6,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 121,
+    "date": "2026-04-26 04:25",
+    "script": "night_train.py",
+    "test_acc": 86.0,
+    "top3_acc": 93.72,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 122,
+    "date": "2026-04-26 04:27",
+    "script": "night_train.py",
+    "test_acc": 86.61,
+    "top3_acc": 94.18,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 123,
+    "date": "2026-04-26 04:27",
+    "script": "night_train.py",
+    "test_acc": 86.72,
+    "top3_acc": 93.55,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 124,
+    "date": "2026-04-26 04:28",
+    "script": "night_train.py",
+    "test_acc": 87.58,
+    "top3_acc": 93.9,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 125,
+    "date": "2026-04-26 04:31",
+    "script": "night_train.py",
+    "test_acc": 88.17,
+    "top3_acc": 94.6,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 126,
+    "date": "2026-04-26 04:35",
+    "script": "night_train.py",
+    "test_acc": 88.33,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 127,
+    "date": "2026-04-26 04:36",
+    "script": "night_train.py",
+    "test_acc": 86.31,
+    "top3_acc": 93.37,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 128,
+    "date": "2026-04-26 04:39",
+    "script": "night_train.py",
+    "test_acc": 88.61,
+    "top3_acc": 94.56,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 129,
+    "date": "2026-04-26 04:40",
+    "script": "night_train.py",
+    "test_acc": 87.51,
+    "top3_acc": 94.08,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 130,
+    "date": "2026-04-26 04:41",
+    "script": "night_train.py",
+    "test_acc": 84.6,
+    "top3_acc": 92.71,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 131,
+    "date": "2026-04-26 04:41",
+    "script": "night_train.py",
+    "test_acc": 85.67,
+    "top3_acc": 93.22,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 132,
+    "date": "2026-04-26 04:43",
+    "script": "night_train.py",
+    "test_acc": 86.39,
+    "top3_acc": 93.55,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 133,
+    "date": "2026-04-26 04:43",
+    "script": "night_train.py",
+    "test_acc": 86.11,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 134,
+    "date": "2026-04-26 04:44",
+    "script": "night_train.py",
+    "test_acc": 87.36,
+    "top3_acc": 93.79,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 135,
+    "date": "2026-04-26 04:48",
+    "script": "night_train.py",
+    "test_acc": 88.35,
+    "top3_acc": 94.8,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 136,
+    "date": "2026-04-26 04:51",
+    "script": "night_train.py",
+    "test_acc": 88.48,
+    "top3_acc": 94.82,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 137,
+    "date": "2026-04-26 04:55",
+    "script": "night_train.py",
+    "test_acc": 88.57,
+    "top3_acc": 94.78,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 138,
+    "date": "2026-04-26 04:55",
+    "script": "night_train.py",
+    "test_acc": 86.79,
+    "top3_acc": 94.08,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 139,
+    "date": "2026-04-26 04:59",
+    "script": "night_train.py",
+    "test_acc": 88.46,
+    "top3_acc": 94.91,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 140,
+    "date": "2026-04-26 05:02",
+    "script": "night_train.py",
+    "test_acc": 88.41,
+    "top3_acc": 94.4,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 141,
+    "date": "2026-04-26 05:03",
+    "script": "night_train.py",
+    "test_acc": 85.6,
+    "top3_acc": 93.2,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 142,
+    "date": "2026-04-26 05:07",
+    "script": "night_train.py",
+    "test_acc": 88.26,
+    "top3_acc": 94.84,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 143,
+    "date": "2026-04-26 05:10",
+    "script": "night_train.py",
+    "test_acc": 88.48,
+    "top3_acc": 94.51,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 144,
+    "date": "2026-04-26 05:11",
+    "script": "night_train.py",
+    "test_acc": 86.9,
+    "top3_acc": 93.97,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 145,
+    "date": "2026-04-26 05:14",
+    "script": "night_train.py",
+    "test_acc": 88.61,
+    "top3_acc": 94.34,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 146,
+    "date": "2026-04-26 05:18",
+    "script": "night_train.py",
+    "test_acc": 88.19,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 147,
+    "date": "2026-04-26 05:21",
+    "script": "night_train.py",
+    "test_acc": 88.48,
+    "top3_acc": 94.6,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 148,
+    "date": "2026-04-26 05:25",
+    "script": "night_train.py",
+    "test_acc": 88.13,
+    "top3_acc": 95.13,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 149,
+    "date": "2026-04-26 05:26",
+    "script": "night_train.py",
+    "test_acc": 87.51,
+    "top3_acc": 94.34,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 150,
+    "date": "2026-04-26 05:30",
+    "script": "night_train.py",
+    "test_acc": 88.04,
+    "top3_acc": 94.6,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 151,
+    "date": "2026-04-26 05:31",
+    "script": "night_train.py",
+    "test_acc": 86.18,
+    "top3_acc": 93.75,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 152,
+    "date": "2026-04-26 05:34",
+    "script": "night_train.py",
+    "test_acc": 88.39,
+    "top3_acc": 94.87,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 153,
+    "date": "2026-04-26 05:35",
+    "script": "night_train.py",
+    "test_acc": 86.61,
+    "top3_acc": 93.72,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 154,
+    "date": "2026-04-26 05:36",
+    "script": "night_train.py",
+    "test_acc": 87.21,
+    "top3_acc": 94.32,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 155,
+    "date": "2026-04-26 05:39",
+    "script": "night_train.py",
+    "test_acc": 88.61,
+    "top3_acc": 94.67,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 156,
+    "date": "2026-04-26 05:42",
+    "script": "night_train.py",
+    "test_acc": 87.89,
+    "top3_acc": 94.76,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 157,
+    "date": "2026-04-26 05:46",
+    "script": "night_train.py",
+    "test_acc": 88.22,
+    "top3_acc": 94.78,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 158,
+    "date": "2026-04-26 05:46",
+    "script": "night_train.py",
+    "test_acc": 86.55,
+    "top3_acc": 93.57,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 159,
+    "date": "2026-04-26 05:47",
+    "script": "night_train.py",
+    "test_acc": 87.32,
+    "top3_acc": 94.18,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 160,
+    "date": "2026-04-26 05:50",
+    "script": "night_train.py",
+    "test_acc": 88.24,
+    "top3_acc": 94.84,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 161,
+    "date": "2026-04-26 05:54",
+    "script": "night_train.py",
+    "test_acc": 88.24,
+    "top3_acc": 94.4,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 162,
+    "date": "2026-04-26 05:57",
+    "script": "night_train.py",
+    "test_acc": 87.93,
+    "top3_acc": 94.56,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 163,
+    "date": "2026-04-26 05:58",
+    "script": "night_train.py",
+    "test_acc": 86.61,
+    "top3_acc": 93.92,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 164,
+    "date": "2026-04-26 05:59",
+    "script": "night_train.py",
+    "test_acc": 87.8,
+    "top3_acc": 94.25,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 165,
+    "date": "2026-04-26 06:02",
+    "script": "night_train.py",
+    "test_acc": 88.19,
+    "top3_acc": 94.49,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 166,
+    "date": "2026-04-26 06:06",
+    "script": "night_train.py",
+    "test_acc": 88.02,
+    "top3_acc": 94.76,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 167,
+    "date": "2026-04-26 06:07",
+    "script": "night_train.py",
+    "test_acc": 85.12,
+    "top3_acc": 93.48,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 168,
+    "date": "2026-04-26 06:10",
+    "script": "night_train.py",
+    "test_acc": 88.19,
+    "top3_acc": 94.82,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 169,
+    "date": "2026-04-26 06:11",
+    "script": "night_train.py",
+    "test_acc": 87.58,
+    "top3_acc": 94.34,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 170,
+    "date": "2026-04-26 06:15",
+    "script": "night_train.py",
+    "test_acc": 87.76,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 171,
+    "date": "2026-04-26 06:19",
+    "script": "night_train.py",
+    "test_acc": 88.28,
+    "top3_acc": 94.78,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 172,
+    "date": "2026-04-26 06:22",
+    "script": "night_train.py",
+    "test_acc": 88.76,
+    "top3_acc": 94.76,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 173,
+    "date": "2026-04-26 06:26",
+    "script": "night_train.py",
+    "test_acc": 88.72,
+    "top3_acc": 94.76,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 174,
+    "date": "2026-04-26 06:27",
+    "script": "night_train.py",
+    "test_acc": 87.47,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 175,
+    "date": "2026-04-26 06:30",
+    "script": "night_train.py",
+    "test_acc": 88.63,
+    "top3_acc": 94.71,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.004 noise=0.02"
+  },
+  {
+    "run": 176,
+    "date": "2026-04-26 06:34",
+    "script": "night_train.py",
+    "test_acc": 88.22,
+    "top3_acc": 94.49,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 177,
+    "date": "2026-04-26 06:34",
+    "script": "night_train.py",
+    "test_acc": 85.63,
+    "top3_acc": 92.8,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.02"
+  },
+  {
+    "run": 178,
+    "date": "2026-04-26 10:05",
+    "script": "night_train.py",
+    "test_acc": 88.0,
+    "top3_acc": 94.36,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 179,
+    "date": "2026-04-26 10:08",
+    "script": "night_train.py",
+    "test_acc": 88.57,
+    "top3_acc": 94.8,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 180,
+    "date": "2026-04-26 10:10",
+    "script": "night_train.py",
+    "test_acc": 87.89,
+    "top3_acc": 94.82,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 181,
+    "date": "2026-04-26 10:14",
+    "script": "night_train.py",
+    "test_acc": 87.78,
+    "top3_acc": 94.38,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 182,
+    "date": "2026-04-26 10:15",
+    "script": "night_train.py",
+    "test_acc": 85.34,
+    "top3_acc": 93.37,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 183,
+    "date": "2026-04-26 10:16",
+    "script": "night_train.py",
+    "test_acc": 86.09,
+    "top3_acc": 93.39,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 184,
+    "date": "2026-04-26 10:19",
+    "script": "night_train.py",
+    "test_acc": 86.97,
+    "top3_acc": 93.79,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.06"
+  },
+  {
+    "run": 185,
+    "date": "2026-04-26 10:24",
+    "script": "night_train.py",
+    "test_acc": 88.26,
+    "top3_acc": 94.38,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.005 noise=0.02"
+  },
+  {
+    "run": 186,
+    "date": "2026-04-26 10:29",
+    "script": "night_train.py",
+    "test_acc": 88.11,
+    "top3_acc": 95.04,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.006 noise=0.03"
+  },
+  {
+    "run": 187,
+    "date": "2026-04-26 10:31",
+    "script": "night_train.py",
+    "test_acc": 85.43,
+    "top3_acc": 93.53,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.08"
+  },
+  {
+    "run": 188,
+    "date": "2026-04-26 10:32",
+    "script": "night_train.py",
+    "test_acc": 86.75,
+    "top3_acc": 93.86,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.1"
+  },
+  {
+    "run": 189,
+    "date": "2026-04-26 10:36",
+    "script": "night_train.py",
+    "test_acc": 87.71,
+    "top3_acc": 93.94,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.04"
+  },
+  {
+    "run": 190,
+    "date": "2026-04-26 10:38",
+    "script": "night_train.py",
+    "test_acc": 85.49,
+    "top3_acc": 93.75,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 191,
+    "date": "2026-04-26 10:40",
+    "script": "night_train.py",
+    "test_acc": 87.91,
+    "top3_acc": 94.51,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 192,
+    "date": "2026-04-26 10:41",
+    "script": "night_train.py",
+    "test_acc": 88.44,
+    "top3_acc": 94.36,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 193,
+    "date": "2026-04-26 10:49",
+    "script": "night_train.py",
+    "test_acc": 88.68,
+    "top3_acc": 94.71,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 194,
+    "date": "2026-04-26 10:50",
+    "script": "night_train.py",
+    "test_acc": 86.92,
+    "top3_acc": 93.99,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 195,
+    "date": "2026-04-26 10:51",
+    "script": "night_train.py",
+    "test_acc": 85.47,
+    "top3_acc": 93.39,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 196,
+    "date": "2026-04-26 10:52",
+    "script": "night_train.py",
+    "test_acc": 86.04,
+    "top3_acc": 93.72,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 197,
+    "date": "2026-04-26 10:55",
+    "script": "night_train.py",
+    "test_acc": 86.42,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.06"
+  },
+  {
+    "run": 198,
+    "date": "2026-04-26 10:59",
+    "script": "night_train.py",
+    "test_acc": 88.44,
+    "top3_acc": 94.82,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.005 noise=0.02"
+  },
+  {
+    "run": 199,
+    "date": "2026-04-26 11:04",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.87,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.006 noise=0.03"
+  },
+  {
+    "run": 200,
+    "date": "2026-04-26 11:06",
+    "script": "night_train.py",
+    "test_acc": 85.93,
+    "top3_acc": 93.35,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.08"
+  },
+  {
+    "run": 201,
+    "date": "2026-04-26 11:08",
+    "script": "night_train.py",
+    "test_acc": 86.53,
+    "top3_acc": 93.66,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.1"
+  },
+  {
+    "run": 202,
+    "date": "2026-04-26 11:11",
+    "script": "night_train.py",
+    "test_acc": 87.25,
+    "top3_acc": 94.34,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.04"
+  },
+  {
+    "run": 203,
+    "date": "2026-04-26 11:13",
+    "script": "night_train.py",
+    "test_acc": 85.28,
+    "top3_acc": 92.98,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 204,
+    "date": "2026-04-26 11:15",
+    "script": "night_train.py",
+    "test_acc": 87.54,
+    "top3_acc": 94.27,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 205,
+    "date": "2026-04-26 11:17",
+    "script": "night_train.py",
+    "test_acc": 88.46,
+    "top3_acc": 94.56,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 206,
+    "date": "2026-04-26 11:19",
+    "script": "night_train.py",
+    "test_acc": 87.67,
+    "top3_acc": 94.6,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 207,
+    "date": "2026-04-26 11:23",
+    "script": "night_train.py",
+    "test_acc": 88.11,
+    "top3_acc": 94.45,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 208,
+    "date": "2026-04-26 11:30",
+    "script": "night_train.py",
+    "test_acc": 88.57,
+    "top3_acc": 94.62,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 209,
+    "date": "2026-04-26 11:31",
+    "script": "Main.py",
+    "test_acc": 10.14,
+    "top3_acc": 19.75,
+    "epochs": 9,
+    "notes": "Fine-tune last 3 blocks on 2,119 originals"
+  },
+  {
+    "run": 209,
+    "date": "2026-04-26 11:33",
+    "script": "night_train.py",
+    "test_acc": 86.24,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 210,
+    "date": "2026-04-26 11:33",
+    "script": "night_train.py",
+    "test_acc": 87.73,
+    "top3_acc": 94.34,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 211,
+    "date": "2026-04-26 11:36",
+    "script": "night_train.py",
+    "test_acc": 88.28,
+    "top3_acc": 94.45,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 212,
+    "date": "2026-04-26 11:38",
+    "script": "night_train.py",
+    "test_acc": 88.15,
+    "top3_acc": 94.4,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 213,
+    "date": "2026-04-26 11:39",
+    "script": "night_train.py",
+    "test_acc": 87.07,
+    "top3_acc": 93.7,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 210,
+    "date": "2026-04-26 11:40",
+    "script": "night_train.py",
+    "test_acc": 88.28,
+    "top3_acc": 94.54,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.06"
+  },
+  {
+    "run": 211,
+    "date": "2026-04-26 12:30",
+    "script": "night_train.py",
+    "test_acc": 88.02,
+    "top3_acc": 94.54,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.005 noise=0.02"
+  },
+  {
+    "run": 214,
+    "date": "2026-04-26 12:30",
+    "script": "night_train.py",
+    "test_acc": 88.61,
+    "top3_acc": 95.0,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 215,
+    "date": "2026-04-26 12:32",
+    "script": "night_train.py",
+    "test_acc": 86.02,
+    "top3_acc": 93.44,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 212,
+    "date": "2026-04-26 12:34",
+    "script": "night_train.py",
+    "test_acc": 88.22,
+    "top3_acc": 94.6,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.006 noise=0.03"
+  },
+  {
+    "run": 216,
+    "date": "2026-04-26 12:34",
+    "script": "night_train.py",
+    "test_acc": 86.75,
+    "top3_acc": 94.08,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.06"
+  },
+  {
+    "run": 213,
+    "date": "2026-04-26 12:35",
+    "script": "night_train.py",
+    "test_acc": 85.89,
+    "top3_acc": 93.15,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.08"
+  },
+  {
+    "run": 214,
+    "date": "2026-04-26 12:37",
+    "script": "night_train.py",
+    "test_acc": 87.38,
+    "top3_acc": 94.16,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.1"
+  },
+  {
+    "run": 217,
+    "date": "2026-04-26 12:39",
+    "script": "night_train.py",
+    "test_acc": 88.5,
+    "top3_acc": 94.43,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.005 noise=0.02"
+  },
+  {
+    "run": 215,
+    "date": "2026-04-26 12:40",
+    "script": "night_train.py",
+    "test_acc": 87.14,
+    "top3_acc": 94.43,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.04"
+  },
+  {
+    "run": 216,
+    "date": "2026-04-26 12:41",
+    "script": "night_train.py",
+    "test_acc": 85.69,
+    "top3_acc": 93.22,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 217,
+    "date": "2026-04-26 12:42",
+    "script": "night_train.py",
+    "test_acc": 87.76,
+    "top3_acc": 94.34,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 218,
+    "date": "2026-04-26 12:43",
+    "script": "night_train.py",
+    "test_acc": 88.33,
+    "top3_acc": 94.71,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.006 noise=0.03"
+  },
+  {
+    "run": 218,
+    "date": "2026-04-26 12:45",
+    "script": "night_train.py",
+    "test_acc": 88.7,
+    "top3_acc": 94.54,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 219,
+    "date": "2026-04-26 12:46",
+    "script": "night_train.py",
+    "test_acc": 88.02,
+    "top3_acc": 94.38,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 219,
+    "date": "2026-04-26 12:50",
+    "script": "night_train.py",
+    "test_acc": 87.78,
+    "top3_acc": 94.45,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.08"
+  },
+  {
+    "run": 220,
+    "date": "2026-04-26 12:51",
+    "script": "night_train.py",
+    "test_acc": 86.53,
+    "top3_acc": 93.81,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.1"
+  },
+  {
+    "run": 220,
+    "date": "2026-04-26 12:51",
+    "script": "night_train.py",
+    "test_acc": 88.26,
+    "top3_acc": 94.65,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 221,
+    "date": "2026-04-26 12:52",
+    "script": "night_train.py",
+    "test_acc": 85.43,
+    "top3_acc": 93.2,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 221,
+    "date": "2026-04-26 12:54",
+    "script": "night_train.py",
+    "test_acc": 87.67,
+    "top3_acc": 94.01,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.04"
+  },
+  {
+    "run": 222,
+    "date": "2026-04-26 12:55",
+    "script": "night_train.py",
+    "test_acc": 86.07,
+    "top3_acc": 93.97,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 222,
+    "date": "2026-04-26 12:56",
+    "script": "night_train.py",
+    "test_acc": 85.32,
+    "top3_acc": 93.46,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.04"
+  },
+  {
+    "run": 223,
+    "date": "2026-04-26 12:56",
+    "script": "night_train.py",
+    "test_acc": 86.83,
+    "top3_acc": 93.77,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.001 noise=0.06"
+  },
+  {
+    "run": 223,
+    "date": "2026-04-26 12:58",
+    "script": "night_train.py",
+    "test_acc": 88.04,
+    "top3_acc": 94.4,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 224,
+    "date": "2026-04-26 12:59",
+    "script": "night_train.py",
+    "test_acc": 88.46,
+    "top3_acc": 94.29,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 224,
+    "date": "2026-04-26 13:00",
+    "script": "night_train.py",
+    "test_acc": 88.48,
+    "top3_acc": 94.73,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.005 noise=0.02"
+  },
+  {
+    "run": 225,
+    "date": "2026-04-26 13:01",
+    "script": "night_train.py",
+    "test_acc": 87.47,
+    "top3_acc": 94.16,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0008 noise=0.03"
+  },
+  {
+    "run": 226,
+    "date": "2026-04-26 13:02",
+    "script": "night_train.py",
+    "test_acc": 86.92,
+    "top3_acc": 93.99,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.03"
+  },
+  {
+    "run": 227,
+    "date": "2026-04-26 13:03",
+    "script": "night_train.py",
+    "test_acc": 85.47,
+    "top3_acc": 93.39,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.003 noise=0.04"
+  },
+  {
+    "run": 228,
+    "date": "2026-04-26 13:04",
+    "script": "night_train.py",
+    "test_acc": 86.04,
+    "top3_acc": 93.72,
+    "epochs": 80,
+    "notes": "Head-only overnight | lr=0.002 noise=0.05"
+  },
+  {
+    "run": 225,
+    "date": "2026-04-26 13:05",
+    "script": "night_train.py",
+    "test_acc": 88.06,
+    "top3_acc": 94.65,
+    "epochs": 60,
+    "notes": "Head-only overnight | lr=0.006 noise=0.03"
+  },
+  {
+    "run": 246,
+    "date": "2026-04-26 13:07",
+    "script": "night_train.py",
+    "test_acc": 87.73,
+    "top3_acc": 94.34,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 247,
+    "date": "2026-04-26 13:12",
+    "script": "night_train.py",
+    "test_acc": 87.73,
+    "top3_acc": 94.34,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 248,
+    "date": "2026-04-26 13:14",
+    "script": "night_train.py",
+    "test_acc": 88.28,
+    "top3_acc": 94.45,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.0005 noise=0.02"
+  },
+  {
+    "run": 249,
+    "date": "2026-04-28 14:58",
+    "script": "deep_train.py",
+    "test_acc": 81.15,
+    "top3_acc": 87.27,
+    "epochs": 45,
+    "notes": "Full backbone fine-tune \u2014 staged unfreeze, differential LR, BN frozen"
+  },
+  {
+    "run": 250,
+    "date": "2026-04-28 17:07",
+    "script": "night_train.py",
+    "test_acc": 87.73,
+    "top3_acc": 94.34,
+    "epochs": 100,
+    "notes": "Head-only overnight | lr=0.001 noise=0.02"
+  },
+  {
+    "run": 251,
+    "date": "2026-04-28 22:04",
+    "script": "rebuild.py",
+    "test_acc": 86.57,
+    "top3_acc": 94.45,
+    "epochs": 80,
+    "notes": "Clean head rebuild from feature cache"
+  }
+]
