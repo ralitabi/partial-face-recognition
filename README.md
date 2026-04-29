@@ -1,31 +1,63 @@
 # Partial Face Recognition System
 
-A closed-set face recognition system that correctly identifies people even when their face is **partially occluded** — masked, blurred, cropped, or obscured. Built with **PyTorch + EfficientNet-B0** transfer learning and a **Streamlit** web interface.
+![Python](https://img.shields.io/badge/Python-3.9%2B-3776ab?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c?style=flat-square&logo=pytorch&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-ff4b4b?style=flat-square&logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-3fb950?style=flat-square)
 
-Developed as a university deep learning course project.
+A deep learning–based closed-set face recognition system designed to identify individuals even when faces are **partially occluded** — masks, blur, cropping, or noise.
+
+Built with **PyTorch + EfficientNet-B0** transfer learning and a **Streamlit** web interface for interactive testing and evaluation.
+
+> Developed as part of a university deep learning project.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Results](#results)
+- [Project Structure](#project-structure)
+- [Dataset](#dataset)
+- [Setup](#setup)
+- [Training Pipeline](#training-pipeline)
+- [Web Application](#web-application)
+- [Model Architecture](#model-architecture)
+- [Notes](#notes)
+- [Future Work](#future-work)
+- [Contributors](#contributors)
+- [License](#license)
+
+---
+
+## Overview
+
+This project focuses on improving face recognition performance under challenging real-world conditions where facial features may be partially hidden. The system uses **transfer learning** and a structured multi-phase training pipeline to maintain robustness across ten distinct occlusion types.
 
 ---
 
 ## Results
 
-| Metric | Score |
-|--------|-------|
-| Test Accuracy (Top-1) | ~88–89% |
-| Top-3 Accuracy | ~94–95% |
-| Classes | 100 CelebA celebrities |
-| Training images | 21,266 (100 identities × 10 occlusion variants) |
+### Overall Performance
 
-**Accuracy by occlusion type:**
+| Metric | Score |
+|---|---|
+| Top-1 Accuracy | **~88–89%** |
+| Top-3 Accuracy | **~94–95%** |
+| Number of Classes | 100 |
+| Training Images | ~21,266 |
+
+### Accuracy by Occlusion Type
 
 | Occlusion | Accuracy |
-|-----------|----------|
+|---|---|
 | Original (clean) | ~99% |
 | Sunglasses | ~98% |
-| Noise patch | ~96% |
-| Random block | ~97% |
-| Crop (left/right) | ~91% |
-| Surgical mask | ~87% |
-| Top crop | ~78% |
+| Noise Patch | ~96% |
+| Random Block | ~97% |
+| Crop (Left / Right) | ~91% |
+| Surgical Mask | ~87% |
+| Top Crop | ~78% |
 | Blurred | ~43% |
 
 ---
@@ -33,66 +65,60 @@ Developed as a university deep learning course project.
 ## Project Structure
 
 ```
-partial-face-recognition-main/
+partial-face-recognition/
 ├── App/
-│   └── steamlit_app.py          # Streamlit web application
+│   └── steamlit_app.py           # Streamlit web interface
 ├── Model/
-│   ├── pretrained_model.py      # Phase 1 — build feature cache + train head
-│   ├── Main.py                  # Phase 2 — head fine-tuning
-│   ├── predict.py               # CLI prediction script
-│   ├── deep_train.py            # Full backbone fine-tuning (staged unfreeze)
-│   └── night_train.py           # Overnight head-only training loop
+│   ├── pretrained_model.py       # Phase 1 — feature extraction + head training
+│   ├── Main.py                   # Phase 2 — head fine-tuning
+│   ├── deep_train.py             # Full backbone training (staged unfreeze)
+│   ├── night_train.py            # Overnight head training loop
+│   └── predict.py                # CLI inference script
 ├── assets/
-│   └── deploy.prototxt          # OpenCV DNN face detector config
+│   ├── deploy.prototxt           # OpenCV DNN face detector config
+│   └── res10_300x300_ssd_iter_140000.caffemodel
 ├── results/
-│   ├── confusion_matrix.png     # Confusion matrix heatmap
-│   ├── learning_curve_accuracy.png  # Training accuracy curve
-│   ├── classification_report.txt    # Per-identity precision / recall / F1
-│   └── training_history.json        # Log of all training runs
-├── model_utils.py               # Shared utilities (model arch, dataset, transforms)
+│   ├── confusion_matrix.png
+│   ├── learning_curve_accuracy.png
+│   ├── classification_report.txt
+│   └── training_history.json
+├── dataset_sample/               # 3 identities x 10 occlusion types (30 images)
+├── model_utils.py                # Shared model utilities
 ├── requirements.txt
-├── README.md
-└── LICENSE
+└── README.md
 ```
 
 ---
 
-## Dataset Sample
+## Dataset
 
-A minimal sample is included in [`dataset_sample/`](./dataset_sample/) so you can explore the data structure without downloading the full dataset.
+A small sample dataset is included under [`dataset_sample/`](./dataset_sample/) to demonstrate the expected data format without requiring the full download.
 
 ```
 dataset_sample/
-├── Female_Adult_Blond_08/
-│   ├── Female_Adult_Blond_08_000_original.jpg
-│   ├── Female_Adult_Blond_08_000_blurred.jpg
-│   ├── Female_Adult_Blond_08_000_sunglasses.jpg
-│   └── ... (10 occlusion variants)
-├── Female_Adult_Dark_Hair_09/
-│   └── ... (10 occlusion variants)
-├── Male_Adult_Black_Hair_93/
-│   └── ... (10 occlusion variants)
+├── Female_Adult_Blond_08/        # 10 occlusion variants
+├── Female_Adult_Dark_Hair_09/    # 10 occlusion variants
+├── Male_Adult_Black_Hair_93/     # 10 occlusion variants
 └── metadata.csv
 ```
 
-**3 identities · 10 occlusion types each · 30 images total**
+### Occlusion Types
 
-Each image in the full dataset exists in 10 variants:
-
-| Occlusion | Description |
-|-----------|-------------|
+| Type | Description |
+|---|---|
 | `original` | Clean, unmodified face |
 | `blurred` | Gaussian blur applied |
-| `sunglasses` | Eyes blocked |
+| `sunglasses` | Eyes covered by dark rectangle |
 | `surgical_mask` | Lower face covered |
-| `top_crop` | Top half removed |
-| `bottom_crop` | Bottom half removed |
-| `left_crop` | Left half removed |
-| `right_crop` | Right half removed |
-| `noise_patch` | Centre replaced with noise |
-| `random_block` | Black rectangle over face |
+| `top_crop` | Upper half of face removed |
+| `bottom_crop` | Lower half of face removed |
+| `left_crop` | Left side removed |
+| `right_crop` | Right side removed |
+| `noise_patch` | Centre replaced with random noise |
+| `random_block` | Solid black rectangle over face |
 
-The full dataset (100 identities × ~21 images × 10 variants = ~21,000 images) is not included due to size (502 MB) and CelebA licensing.
+> The full dataset (~500 MB, 100 identities) is excluded due to size and CelebA licensing.
+> The `metadata.csv` must contain columns: `identity`, `filename`, `transformation`, `split`.
 
 ---
 
@@ -104,93 +130,151 @@ The full dataset (100 identities × ~21 images × 10 variants = ~21,000 images) 
 pip install -r requirements.txt
 ```
 
-### 2. Download required assets
+### 2. Download required files
 
-**Dataset** — place the `partial_face_dataset/` folder in the project root.  
-It must contain one subfolder per identity (e.g. `Female_Adult_Blond_08/`) with images and a `metadata.csv` at the root with columns `identity`, `filename`, `transformation`, `split`.
+Place the following in the `assets/` folder:
 
-**Face detector** — download the OpenCV ResNet-SSD weights (11 MB):
 ```
-res10_300x300_ssd_iter_140000.caffemodel
+assets/res10_300x300_ssd_iter_140000.caffemodel
 ```
-Place it alongside `deploy.prototxt` in the project root. These files enable accurate face detection in uploaded photos.
 
-### 3. Train the model
+This is the OpenCV ResNet-SSD face detector (~11 MB, available from the OpenCV repository).
 
-**Phase 1 — build feature cache and train head** (~20–30 min, run once):
+### 3. Add the full dataset
+
+Place the full dataset at the project root:
+
+```
+partial_face_dataset/
+└── <identity_name>/
+    ├── <identity_name>_000_original.jpg
+    ├── <identity_name>_000_blurred.jpg
+    └── ...
+```
+
+---
+
+## Training Pipeline
+
+Training is split into phases. Run them in order for best results.
+
+### Phase 1 — Feature Extraction + Head Training
+
+Extracts EfficientNet-B0 features for all images, caches them, then trains the classifier head. Run once (~20–30 min on CPU).
+
 ```bash
 python Model/pretrained_model.py
 ```
-This extracts EfficientNet-B0 features for all 21k images, caches them to `features_cache/`, trains the classifier head, and saves `best_model.pt`.
 
-**Phase 2 — fine-tune the head** (optional, ~5–15 min):
+### Phase 2 — Head Fine-Tuning
+
+Continues training the head with a lower learning rate. Safe and fast (~5–15 min).
+
 ```bash
 python Model/Main.py
 ```
 
-**Overnight head loop** (optional, runs until 08:00):
+### Full Backbone Training *(optional)*
+
+Staged backbone unfreeze with differential learning rates. Targets 90%+ accuracy. Slow (~4–8 hrs on CPU).
+
 ```bash
-python night_train.py
+python Model/deep_train.py
 ```
 
-**Full backbone fine-tuning** (optional, 4–8 hrs on CPU):
+### Overnight Training Loop *(optional)*
+
+Cycles through 13 hyperparameter configurations until 08:00. Best for overnight runs.
+
 ```bash
-python deep_train.py
+python Model/night_train.py
 ```
 
-### 4. Launch the web app
+---
+
+## Web Application
+
+Launch the Streamlit interface:
 
 ```bash
 streamlit run App/steamlit_app.py
 ```
 
-Open [localhost:8501](http://localhost:8501) in your browser.
+Open in your browser at `http://localhost:8501`
 
----
-
-## Web App Pages
+### Pages
 
 | Page | Description |
-|------|-------------|
-| **Recognize** | Upload a face image and get top-K predictions with confidence scores |
+|---|---|
+| **Recognize** | Upload a face image — get top-K predictions with confidence scores |
 | **Dataset** | Browse all 100 identities and their occlusion variants |
 | **Add Data** | Upload new face photos and assign them to an identity |
 | **Evaluations** | Confusion matrix, per-identity F1, occlusion breakdown, radar chart |
-| **Train & History** | Launch training scripts and view accuracy history across all runs |
+| **Train & History** | Launch training scripts and view accuracy across all runs |
 
 ---
 
-## Architecture
+## Model Architecture
 
-- **Backbone:** EfficientNet-B0 (ImageNet pretrained, frozen during head training)
-- **Head:** `Dropout(0.4) → Linear(1280→512) → BN → ReLU → Dropout(0.3) → Linear(512→100)`
+```
+Input Image (224x224)
+       |
+EfficientNet-B0 Backbone  <-- ImageNet pretrained, frozen during head training
+       |
+  [1280-dim features]
+       |
+  Dropout (p=0.4)
+  Linear (1280 -> 512)
+  BatchNorm1D
+  ReLU
+  Dropout (p=0.3)
+  Linear (512 -> 100)
+       |
+  Class Logits
+       |
+Temperature Scaling (T=0.5)  <-- sharpens confidence scores at inference
+       |
+    Softmax
+```
+
 - **Loss:** CrossEntropyLoss with label smoothing (0.05–0.08) + class weighting
-- **Face detection:** OpenCV ResNet-SSD (primary) with Haar cascade fallback
-- **Inference:** Temperature scaling (T=0.5) applied to logits for sharper confidence
+- **Face Detection:** OpenCV ResNet-SSD (primary) → Haar cascade (fallback)
+- **Optimizer:** Adam with cosine annealing
 
 ---
 
 ## Notes
 
-- The model is a **closed-set classifier** — it can only identify the 100 people it was trained on. Photos of anyone else will produce a low-confidence result (shown with a warning at <40% confidence).
-- `features_cache/` and `partial_face_dataset/` are excluded from the repository (too large). Run Phase 1 training to regenerate the cache.
-- `best_model.pt` is also excluded. Run training to produce it, or ask for a pre-trained weights file.
+- This is a **closed-set** recognition system — it can only identify the 100 people it was trained on
+- Uploading a photo of someone outside those 100 will produce a **low-confidence** result (flagged at < 40%)
+- Model weights (`.pt`) and the full dataset are excluded from the repository — run training to generate them
+- The feature cache (`features_cache/`) is regenerated automatically by Phase 1 training
 
 ---
 
-## Credits
+## Future Work
 
-Developed by:
+- Open-set recognition with rejection thresholds
+- Improved accuracy on heavily blurred images
+- Real-time video inference
+- Cloud deployment (Streamlit Cloud / Hugging Face Spaces)
+- Expanded dataset with greater demographic diversity
 
-- **Raja Ali Tabish**
-- **Aatma Ram**
-- **Moiz Kiani**
-- **Aparna Ghimire**
+---
 
-Supervised as part of a university deep learning course.
+## Contributors
+
+This project was developed as a collaborative university assignment by:
+
+| Name | Role |
+|---|---|
+| **Raja Ali Tabish** | Lead Developer |
+| **Aatma Ram** | Model Training |
+| **Moiz Kiani** | Data Pipeline |
+| **Aparna Ghimire** | Evaluation & Testing |
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](./LICENSE).
+This project is licensed under the **MIT License** — see [LICENSE](./LICENSE) for details.
