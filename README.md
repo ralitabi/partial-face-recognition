@@ -264,14 +264,7 @@ Temperature Scaling (T=0.5)  <-- sharpens confidence scores at inference
 
 ## Contributors
 
-This project was developed as a collaborative university assignment by:
-
-| Name | Role |
-|---|---|
-| **Raja Ali Tabish** | Lead Developer |
-| **Aatma Ram** | Model Training |
-| **Moiz Kiani** | Data Pipeline |
-| **Aparna Ghimire** | Evaluation & Testing |
+**Raja Ali Tabish**
 
 ---
 
